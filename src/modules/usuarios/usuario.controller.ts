@@ -1,12 +1,11 @@
 import { Request, Response } from 'express'
 import { UsuarioService } from './usuario.service'
-import { RoleService } from '../roles/role.service'
 
 export const UsuarioController = {
     getAll: async (req: Request, res: Response) => {
         try {
-            const roles = await UsuarioService.getAll()
-            res.json(roles)
+            const usuarios = await UsuarioService.getAll()
+            res.json(usuarios)
         } catch (error: any) {
             res.status(500).json({ message: error.message })
         }
@@ -14,8 +13,8 @@ export const UsuarioController = {
 
     getById: async (req: Request, res: Response) => {
         try {
-            const role = await UsuarioService.getById(Number(req.params.id))
-            res.json(role)
+            const usuario = await UsuarioService.getById(Number(req.params.id))
+            res.json(usuario)
         } catch (error: any) {
             res.status(404).json({ message: error.message })
         }
@@ -23,8 +22,8 @@ export const UsuarioController = {
 
     create: async (req: Request, res: Response) => {
         try {
-            const role = await UsuarioService.create(req.body)
-            res.status(201).json(role)
+            const usuario = await UsuarioService.create(req.body)
+            res.status(201).json(usuario)
         } catch (error: any) {
             res.status(400).json({ message: error.message })
         }
@@ -32,8 +31,8 @@ export const UsuarioController = {
 
     update: async (req: Request, res: Response) => {
         try {
-            const role = await UsuarioService.update(Number(req.params.id), req.body)
-            res.json(role)
+            const usuario = await UsuarioService.update(Number(req.params.id), req.body)
+            res.json(usuario)
         } catch (error: any) {
             res.status(404).json({ message: error.message })
         }

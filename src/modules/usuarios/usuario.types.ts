@@ -1,7 +1,6 @@
 export interface Usuario {
     id_usuario: number
     id_rol: number
-    id_refug: number
     telf_usuario: string
     corr_usuario: string
     nom_usuario: string
@@ -13,7 +12,6 @@ export interface Usuario {
 
 export interface CreateUsuarioDto {
     id_rol: number
-    id_refug: number
     telf_usuario: string
     corr_usuario: string
     contra_usuario: string

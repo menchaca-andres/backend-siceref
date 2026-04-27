@@ -6,18 +6,20 @@ export const UsuarioModel = {
     const result = await pool.query(`
       SELECT u.id_usuario, u.nom_usuario, u.apell_usuario, u.corr_usuario,
              u.telf_usuario, u.direc_usuario, u.fenac_usuario, u.gen_usuario,
-             r.nom_rol
+             r.nom_rol, ref.nom_refug
       FROM USUARIOS u
       JOIN ROLES r ON u.id_rol = r.id_rol
+      JOIN REFUGIOS ref ON u.id_refug = ref.id_refug
     `)
     return result.rows
   },
 
   findById: async (id: number) => {
     const result = await pool.query(`
-      SELECT u.*, r.nom_rol
+      SELECT u.*, r.nom_rol, ref.nom_refug
       FROM USUARIOS u
       JOIN ROLES r ON u.id_rol = r.id_rol
+      JOIN REFUGIOS ref ON u.id_refug = ref.id_refug
       WHERE u.id_usuario = $1
     `, [id])
     return result.rows[0]
@@ -34,12 +36,12 @@ export const UsuarioModel = {
   create: async (data: CreateUsuarioDto) => {
     const result = await pool.query(`
       INSERT INTO USUARIOS 
-        (id_rol, telf_usuario, corr_usuario, contra_usuario,
+        (id_rol, id_refug, telf_usuario, corr_usuario, contra_usuario,
          nom_usuario, apell_usuario, fenac_usuario, gen_usuario, direc_usuario)
-      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)
+      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)
       RETURNING *
     `, [
-      data.id_rol, data.telf_usuario, data.corr_usuario,
+      data.id_rol, data.id_refug, data.telf_usuario, data.corr_usuario,
       data.contra_usuario, data.nom_usuario, data.apell_usuario,
       data.fenac_usuario, data.gen_usuario, data.direc_usuario
     ])

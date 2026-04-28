@@ -5,6 +5,7 @@ import razaRoutes from './modules/razas/raza.routes'
 import usuarioRoutes from './modules/usuarios/usuario.routes'
 import mascotaRoutes from './modules/mascotas/mascota.routes'
 import refugioRoutes from './modules/refugios/refugio.routes'
+import authRoutes from './modules/auth/auth.routes'
 
 const app = express()
 app.use(express.json())
@@ -15,5 +16,6 @@ app.use('/api/razas', razaRoutes)
 app.use('/api/usuarios', usuarioRoutes)
 app.use('/api/mascotas', mascotaRoutes)
 app.use('/api/refugios', refugioRoutes)
+app.use('/api/auth', authRoutes)
 
 export default app

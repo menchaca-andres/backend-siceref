@@ -4,24 +4,24 @@ import { CreateUsuarioDto, UpdateUsuarioDto } from './usuario.types'
 export const UsuarioModel = {
   findAll: async () => {
     const result = await pool.query(`
-      SELECT u.id_usuario, u.nom_usuario, u.apell_usuario, u.corr_usuario,
-             u.telf_usuario, u.direc_usuario, u.fenac_usuario, u.gen_usuario,
-             r.nom_rol, ref.nom_refug
-      FROM USUARIOS u
-      JOIN ROLES r ON u.id_rol = r.id_rol
-      JOIN REFUGIOS ref ON u.id_refug = ref.id_refug
-    `)
+    SELECT u.id_usuario, u.nom_usuario, u.apell_usuario, u.corr_usuario,
+           u.telf_usuario, u.direc_usuario, u.fenac_usuario, u.gen_usuario,
+           r.nom_rol, ref.nom_refug
+    FROM USUARIOS u
+    JOIN ROLES r ON u.id_rol = r.id_rol
+    LEFT JOIN REFUGIOS ref ON u.id_refug = ref.id_refug
+  `)
     return result.rows
   },
 
   findById: async (id: number) => {
     const result = await pool.query(`
-      SELECT u.*, r.nom_rol, ref.nom_refug
-      FROM USUARIOS u
-      JOIN ROLES r ON u.id_rol = r.id_rol
-      JOIN REFUGIOS ref ON u.id_refug = ref.id_refug
-      WHERE u.id_usuario = $1
-    `, [id])
+    SELECT u.*, r.nom_rol, ref.nom_refug
+    FROM USUARIOS u
+    JOIN ROLES r ON u.id_rol = r.id_rol
+    LEFT JOIN REFUGIOS ref ON u.id_refug = ref.id_refug
+    WHERE u.id_usuario = $1
+  `, [id])
     return result.rows[0]
   },
 

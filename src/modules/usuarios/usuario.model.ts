@@ -35,13 +35,13 @@ export const UsuarioModel = {
 
   create: async (data: CreateUsuarioDto) => {
     const result = await pool.query(`
-      INSERT INTO USUARIOS 
-        (id_rol, id_refug, telf_usuario, corr_usuario, contra_usuario,
-         nom_usuario, apell_usuario, fenac_usuario, gen_usuario, direc_usuario)
-      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)
-      RETURNING *
-    `, [
-      data.id_rol, data.id_refug, data.telf_usuario, data.corr_usuario,
+    INSERT INTO USUARIOS 
+      (id_rol, id_refug, telf_usuario, corr_usuario, contra_usuario,
+       nom_usuario, apell_usuario, fenac_usuario, gen_usuario, direc_usuario)
+    VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)
+    RETURNING *
+  `, [
+      data.id_rol, data.id_refug ?? null, data.telf_usuario, data.corr_usuario,
       data.contra_usuario, data.nom_usuario, data.apell_usuario,
       data.fenac_usuario, data.gen_usuario, data.direc_usuario
     ])

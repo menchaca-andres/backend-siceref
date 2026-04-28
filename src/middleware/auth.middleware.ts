@@ -3,14 +3,6 @@ import jwt from 'jsonwebtoken'
 import { env } from '../config/env'
 import { JwtPayload } from '../modules/auth/auth.types'
 
-declare global {
-    namespace Express {
-        interface Request {
-            usuario?: JwtPayload
-        }
-    }
-}
-
 export const verificarToken = (req: Request, res: Response, next: NextFunction) => {
     const authHeader = req.headers.authorization
 

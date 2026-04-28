@@ -1,5 +1,6 @@
 import { UsuarioModel } from './usuario.model'
 import { CreateUsuarioDto, UpdateUsuarioDto } from './usuario.types'
+import bcrypt from 'bcrypt'
 
 export const UsuarioService = {
     getAll: async () => await UsuarioModel.findAll(),
@@ -13,7 +14,10 @@ export const UsuarioService = {
     create: async (data: CreateUsuarioDto) => {
         const existe = await UsuarioModel.findByEmail(data.corr_usuario)
         if (existe) throw new Error('El correo ya está registrado')
-        return await UsuarioModel.create(data)
+
+        const hashPassword = await bcrypt.hash(data.contra_usuario, 10)
+
+        return await UsuarioModel.create({ ...data, contra_usuario: hashPassword })
     },
 
     update: async (id: number, data: UpdateUsuarioDto) => {

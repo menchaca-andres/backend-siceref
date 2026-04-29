@@ -37,5 +37,14 @@ export const AuthController = {
         } catch (error: any) {
             res.status(400).json({ message: error.message })
         }
-    }
+    },
+
+    registerAdminRefugio: async (req: Request, res: Response) => {
+        try {
+            const usuario = await AuthService.registerAdminRefugio(req.body)
+            res.status(201).json({ message: 'Administrador de refugio registrado correctamente', usuario })
+        } catch (error: any) {
+            res.status(400).json({ message: error.message })
+        }
+    },
 }

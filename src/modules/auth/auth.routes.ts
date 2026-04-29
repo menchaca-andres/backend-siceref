@@ -9,5 +9,6 @@ router.post('/login', AuthController.login)
 router.post('/register', AuthController.register)
 router.post('/register/worker', verificarToken, autorizar('Administrador Refugio'), AuthController.registerWorker)
 router.post('/register/superadmin', verificarToken, autorizar('Superadmin'), AuthController.registerSuperadmin)
+router.post('/register/admin-refugio', verificarToken, autorizar('Superadmin'), AuthController.registerAdminRefugio)
 
 export default router

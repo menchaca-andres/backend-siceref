@@ -35,21 +35,21 @@ model USUARIOS {
   nom_usu    String   @db.VarChar(80)
   apell_usu  String   @db.VarChar(80)
   fecnac_usu DateTime @db.Date
-  numcel_usu Int
+  numcel_usu String   @db.VarChar(20)
   email_usu  String   @unique @db.VarChar(80)
   pass_usu   String   @db.Text
 
   id_rol  Int
-  rol     ROLES    @relation(fields: [id_rol], references: [id_rol])
-  id_ref  Int
-  refugio REFUGIOS @relation(fields: [id_ref], references: [id_ref])
+  rol     ROLES     @relation(fields: [id_rol], references: [id_rol])
+  id_ref  Int?
+  refugio REFUGIOS? @relation(fields: [id_ref], references: [id_ref])
 }
 
 model REFUGIOS {
   id_ref     Int        @id @default(autoincrement())
   nom_ref    String     @db.VarChar(80)
   direc_ref  String     @db.VarChar(150)
-  telef_ref  Int
+  telef_ref  String     @db.VarChar(20)
   email_ref  String     @unique @db.VarChar(80)
   estado_ref Boolean    @default(true)
   usuarios   USUARIOS[]

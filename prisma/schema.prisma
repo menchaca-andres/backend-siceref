@@ -1,8 +1,86 @@
 generator client {
   provider = "prisma-client"
-  output   = "../src/generated/prisma"
+  output   = "../generated/prisma"
 }
 
 datasource db {
   provider = "postgresql"
+}
+
+model ROLES {
+  id_rol      Int        @id @default(autoincrement())
+  nom_rol     String     @db.VarChar(50)
+  descrip_rol String     @db.Text
+  rolPerms    ROL_PERM[]
+  usuarios    USUARIOS[]
+}
+
+model PERMISOS {
+  id_per   Int        @id @default(autoincrement())
+  nombre   String     @db.VarChar(50)
+  rolPerms ROL_PERM[]
+}
+
+model ROL_PERM {
+  id_rol  Int
+  id_per  Int
+  rol     ROLES    @relation(fields: [id_rol], references: [id_rol])
+  permiso PERMISOS @relation(fields: [id_per], references: [id_per])
+
+  @@id([id_rol, id_per])
+}
+
+model USUARIOS {
+  id_usu     Int      @id @default(autoincrement())
+  nom_usu    String   @db.VarChar(80)
+  apell_usu  String   @db.VarChar(80)
+  fecnac_usu DateTime @db.Date
+  numcel_usu Int
+  email_usu  String   @unique @db.VarChar(80)
+  pass_usu   String   @db.Text
+
+  id_rol  Int
+  rol     ROLES    @relation(fields: [id_rol], references: [id_rol])
+  id_ref  Int
+  refugio REFUGIOS @relation(fields: [id_ref], references: [id_ref])
+}
+
+model REFUGIOS {
+  id_ref     Int        @id @default(autoincrement())
+  nom_ref    String     @db.VarChar(80)
+  direc_ref  String     @db.VarChar(150)
+  telef_ref  Int
+  email_ref  String     @unique @db.VarChar(80)
+  estado_ref Boolean    @default(true)
+  usuarios   USUARIOS[]
+}
+
+model ESPECIES {
+  id_esp  Int     @id @default(autoincrement())
+  nom_esp String  @db.VarChar(50)
+  razas   RAZAS[]
+}
+
+model RAZAS {
+  id_raza  Int    @id @default(autoincrement())
+  nom_raza String @db.VarChar(50)
+
+  id_esp   Int
+  especie  ESPECIES   @relation(fields: [id_esp], references: [id_esp])
+  animales ANIMALES[]
+}
+
+model ANIMALES {
+  id_ani Int @id @default(autoincrement())
+
+  nom_ani      String   @db.VarChar(80)
+  fechanac_ani DateTime @db.Date
+  esteril_ani  Boolean
+  sexo_ani     String   @db.VarChar(10)
+  carac_ani    String   @db.Text
+  fechaing_ani DateTime @default(now()) @db.Date
+  foto_ani     String   @db.Text
+
+  id_raza Int
+  raza    RAZAS @relation(fields: [id_raza], references: [id_raza])
 }

@@ -10,8 +10,9 @@ El backend está desarrollado en TypeScript con Express, PostgreSQL y Prisma.
 ```
 bun run dev
 ```
-```
 
 npx prisma db push
+
+```
 npx prisma generate
 

@@ -3,6 +3,10 @@ Este es el backend del sistema SICEFER (Sistema Centralizado de Refugios de Masc
 
 ## Tecnologías
 
-El backend está desarrollado en TypeScript con Express y PostgreSQL.
+El backend está desarrollado en TypeScript con Express, PostgreSQL y Prisma.
 
-## Estructura del proyecto
+bun run dev
+
+npx prisma db push
+npx prisma generate
+

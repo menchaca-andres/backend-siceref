@@ -11,6 +11,15 @@ export const UsuarioController = {
         }
     },
 
+    getMyWorkers: async (req: Request, res: Response) => {
+        try {
+            const trabajadores = await UsuarioService.getMyWorkers(req.usuario?.id_ref ?? null)
+            res.json(trabajadores)
+        } catch (error: any) {
+            res.status(403).json({ message: error.message })
+        }
+    },
+
     getById: async (req: Request, res: Response) => {
         try {
             const usuario = await UsuarioService.getById(Number(req.params.id))

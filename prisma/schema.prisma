@@ -67,19 +67,18 @@ model RAZAS {
 
   id_esp   Int
   especie  ESPECIES   @relation(fields: [id_esp], references: [id_esp])
-  animales ANIMALES[]
+  mascotas MASCOTAS[]
 }
 
-model ANIMALES {
+model MASCOTAS {
   id_ani Int @id @default(autoincrement())
 
-  nom_ani      String   @db.VarChar(80)
-  fechanac_ani DateTime @db.Date
-  esteril_ani  Boolean
-  sexo_ani     String   @db.VarChar(10)
-  carac_ani    String   @db.Text
-  fechaing_ani DateTime @default(now()) @db.Date
-  foto_ani     String   @db.Text
+  nom_mascot      String   @db.VarChar(80)
+  fechanac_mascot DateTime @db.Date
+  esteril_mascot  Boolean
+  sexo_mascot     String   @db.VarChar(10)
+  caract_mascot   String   @db.Text
+  fechaing_mascot DateTime @default(now()) @db.Date
 
   id_raza Int
   raza    RAZAS @relation(fields: [id_raza], references: [id_raza])

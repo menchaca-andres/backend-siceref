@@ -1,73 +1,66 @@
-import { pool } from '../../config/database'
+import { prisma } from '../../config/database'
+import { toDate } from '../../utils/date'
 import { CreateUsuarioDto, UpdateUsuarioDto } from './usuario.types'
+
+const usuarioSelect = {
+  id_usu: true,
+  nom_usu: true,
+  apell_usu: true,
+  fecnac_usu: true,
+  numcel_usu: true,
+  email_usu: true,
+  id_rol: true,
+  id_ref: true,
+  rol: true,
+  refugio: true,
+}
 
 export const UsuarioModel = {
   findAll: async () => {
-    const result = await pool.query(`
-    SELECT u.id_usuario, u.nom_usuario, u.apell_usuario, u.corr_usuario,
-           u.telf_usuario, u.direc_usuario, u.fenac_usuario, u.gen_usuario,
-           r.nom_rol, ref.nom_refug
-    FROM USUARIOS u
-    JOIN ROLES r ON u.id_rol = r.id_rol
-    LEFT JOIN REFUGIOS ref ON u.id_refug = ref.id_refug
-  `)
-    return result.rows
+    return await prisma.usuarios.findMany({
+      select: usuarioSelect,
+      orderBy: { id_usu: 'asc' },
+    })
   },
 
   findById: async (id: number) => {
-    const result = await pool.query(`
-    SELECT u.*, r.nom_rol, ref.nom_refug
-    FROM USUARIOS u
-    JOIN ROLES r ON u.id_rol = r.id_rol
-    LEFT JOIN REFUGIOS ref ON u.id_refug = ref.id_refug
-    WHERE u.id_usuario = $1
-  `, [id])
-    return result.rows[0]
+    return await prisma.usuarios.findUnique({
+      where: { id_usu: id },
+      select: usuarioSelect,
+    })
   },
 
   findByEmail: async (email: string) => {
-    const result = await pool.query(
-      'SELECT * FROM USUARIOS WHERE corr_usuario = $1',
-      [email]
-    )
-    return result.rows[0]
+    return await prisma.usuarios.findUnique({ where: { email_usu: email } })
+  },
+
+  findWorkersByRefugio: async (id_ref: number) => {
+    return await prisma.usuarios.findMany({
+      where: {
+        id_ref,
+        rol: { codigo: 'trabajador-refugio' },
+      },
+      select: usuarioSelect,
+      orderBy: { id_usu: 'asc' },
+    })
   },
 
   create: async (data: CreateUsuarioDto) => {
-    const result = await pool.query(`
-    INSERT INTO USUARIOS 
-      (id_rol, id_refug, telf_usuario, corr_usuario, contra_usuario,
-       nom_usuario, apell_usuario, fenac_usuario, gen_usuario, direc_usuario)
-    VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)
-    RETURNING *
-  `, [
-      data.id_rol, data.id_refug ?? null, data.telf_usuario, data.corr_usuario,
-      data.contra_usuario, data.nom_usuario, data.apell_usuario,
-      data.fenac_usuario, data.gen_usuario, data.direc_usuario
-    ])
-    return result.rows[0]
+    return await prisma.usuarios.create({
+      data: { ...data, fecnac_usu: toDate(data.fecnac_usu)!, id_ref: data.id_ref ?? null },
+      select: usuarioSelect,
+    })
   },
 
   update: async (id: number, data: UpdateUsuarioDto) => {
-    const result = await pool.query(`
-      UPDATE USUARIOS SET
-        telf_usuario = $1, corr_usuario = $2,
-        nom_usuario = $3, apell_usuario = $4, direc_usuario = $5
-      WHERE id_usuario = $6
-      RETURNING *
-    `, [
-      data.telf_usuario, data.corr_usuario,
-      data.nom_usuario, data.apell_usuario,
-      data.direc_usuario, id
-    ])
-    return result.rows[0]
+    return await prisma.usuarios.update({
+      where: { id_usu: id },
+      data: { ...data, fecnac_usu: toDate(data.fecnac_usu) },
+      select: usuarioSelect,
+    }).catch(() => null)
   },
 
   delete: async (id: number) => {
-    const result = await pool.query(
-      'DELETE FROM USUARIOS WHERE id_usuario = $1 RETURNING *',
-      [id]
-    )
-    return result.rows[0]
+    return await prisma.usuarios.delete({ where: { id_usu: id } }).catch(() => null)
   },
 }

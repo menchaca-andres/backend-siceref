@@ -7,17 +7,19 @@ import usuarioRoutes from './modules/usuarios/usuario.routes'
 import mascotaRoutes from './modules/mascotas/mascota.routes'
 import refugioRoutes from './modules/refugios/refugio.routes'
 import authRoutes from './modules/auth/auth.routes'
+import permisoRoutes from './modules/permisos/permiso.routes'
 
 const app = express()
 
 app.use(cors({
-    origin: 'http://localhost:4200',
-    methods: ['GET', 'POST', 'PUT', 'DELETE'],
-    allowedHeaders: ['Content-Type', 'Authorization']
+  origin: 'http://localhost:4200',
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  allowedHeaders: ['Content-Type', 'Authorization']
 }))
 
 app.use(express.json())
 
+app.use('/api/permisos', permisoRoutes)
 app.use('/api/roles', roleRoutes)
 app.use('/api/especies', especieRoutes)
 app.use('/api/razas', razaRoutes)

@@ -5,10 +5,10 @@ import { autorizar } from '../../middleware/roles.middleware'
 
 const router = Router()
 
-router.get('/', verificarToken, autorizar('Superadmin', 'Administrador Refugio', 'Trabajador Refugio'), EspecieController.getAll)
-router.get('/:id', verificarToken, autorizar('Superadmin', 'Administrador Refugio', 'Trabajador Refugio'), EspecieController.getById)
-router.post('/', verificarToken, autorizar('Superadmin', 'Administrador Refugio'), EspecieController.create)
-router.put('/:id', verificarToken, autorizar('Superadmin', 'Administrador Refugio'), EspecieController.update)
-router.delete('/:id', verificarToken, autorizar('Superadmin', 'Administrador Refugio'), EspecieController.delete)
+router.get('/', verificarToken, autorizar('especies:obtener'), EspecieController.getAll)
+router.get('/:id', verificarToken, autorizar('especies:obtener'), EspecieController.getById)
+router.post('/', verificarToken, autorizar('especies:crear'), EspecieController.create)
+router.put('/:id', verificarToken, autorizar('especies:modificar'), EspecieController.update)
+router.delete('/:id', verificarToken, autorizar('especies:eliminar'), EspecieController.delete)
 
 export default router

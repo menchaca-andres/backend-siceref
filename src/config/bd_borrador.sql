@@ -2,154 +2,268 @@
 -- *    TABLES     *
 -- *****************
 
--- REFUGIOS
-CREATE TABLE REFUGIOS (
-    id_refug serial  NOT NULL,
-    nom_refug varchar(80)  NOT NULL,
-    dir_refug varchar(200)  NOT NULL,
-    telf_refug varchar(12)  NOT NULL,
-    corr_refug varchar(100)  NOT NULL,
-    contra_refug varchar(12)  NOT NULL,
-    licencia_refug varchar(200)  NOT NULL,
-    CONSTRAINT REFUGIOS_pk PRIMARY KEY (id_refug)
-);
+DROP TABLE IF EXISTS ROL_PERM;
+DROP TABLE IF EXISTS MASCOTAS;
+DROP TABLE IF EXISTS RAZAS;
+DROP TABLE IF EXISTS ESPECIES;
+DROP TABLE IF EXISTS USUARIOS;
+DROP TABLE IF EXISTS REFUGIOS;
+DROP TABLE IF EXISTS PERMISOS;
+DROP TABLE IF EXISTS ROLES;
 
 -- ROLES
 CREATE TABLE ROLES (
-    id_rol serial PRIMARY KEY NOT NULL,
-    nom_rol varchar(50)  NOT NULL
+    id_rol serial PRIMARY KEY,
+    codigo varchar(50) NOT NULL UNIQUE,
+    nom_rol varchar(50) NOT NULL,
+    descrip_rol text NOT NULL
+);
+
+-- PERMISOS
+CREATE TABLE PERMISOS (
+    id_per serial PRIMARY KEY,
+    codigo varchar(80) NOT NULL UNIQUE,
+    nombre varchar(50) NOT NULL
+);
+
+-- ROL_PERM
+CREATE TABLE ROL_PERM (
+    id_rol int NOT NULL,
+    id_per int NOT NULL,
+    CONSTRAINT ROL_PERM_pk PRIMARY KEY (id_rol, id_per),
+    CONSTRAINT ROL_PERM_ROLES_fk FOREIGN KEY (id_rol) REFERENCES ROLES (id_rol),
+    CONSTRAINT ROL_PERM_PERMISOS_fk FOREIGN KEY (id_per) REFERENCES PERMISOS (id_per)
+);
+
+-- REFUGIOS
+CREATE TABLE REFUGIOS (
+    id_ref serial PRIMARY KEY,
+    nom_ref varchar(80) NOT NULL,
+    direc_ref varchar(150) NOT NULL,
+    telef_ref varchar(20) NOT NULL,
+    email_ref varchar(80) NOT NULL UNIQUE,
+    estado_ref boolean NOT NULL DEFAULT true
 );
 
 -- USUARIOS
 CREATE TABLE USUARIOS (
-    id_usuario serial PRIMARY KEY NOT NULL,
-    id_rol int  NOT NULL,
-	id_refug int NULL,
-    telf_usuario varchar(20) NULL,
-    corr_usuario varchar(100)  NOT NULL,
-    contra_usuario text  NOT NULL,
-    nom_usuario varchar(80)  NOT NULL,
-    apell_usuario varchar(80)  NOT NULL,
-    fenac_usuario date  NOT NULL,
-    gen_usuario boolean  NOT NULL,
-    direc_usuario text NULL
+    id_usu serial PRIMARY KEY,
+    nom_usu varchar(80) NOT NULL,
+    apell_usu varchar(80) NOT NULL,
+    fecnac_usu date NOT NULL,
+    numcel_usu varchar(20) NOT NULL,
+    email_usu varchar(80) NOT NULL UNIQUE,
+    pass_usu text NOT NULL,
+    id_rol int NOT NULL,
+    id_ref int NULL,
+    CONSTRAINT USUARIOS_ROLES_fk FOREIGN KEY (id_rol) REFERENCES ROLES (id_rol),
+    CONSTRAINT USUARIOS_REFUGIOS_fk FOREIGN KEY (id_ref) REFERENCES REFUGIOS (id_ref)
 );
 
 -- ESPECIES
 CREATE TABLE ESPECIES (
-    id_espe serial PRIMARY KEY NOT NULL,
-    nom_espe varchar(50)  NOT NULL
+    id_esp serial PRIMARY KEY,
+    nom_esp varchar(50) NOT NULL
 );
 
 -- RAZAS
 CREATE TABLE RAZAS (
-    id_raza serial PRIMARY KEY NOT NULL,
-    id_espe int  NOT NULL,
-    nom_raza varchar(50) NULL
+    id_raza serial PRIMARY KEY,
+    nom_raza varchar(50) NOT NULL,
+    id_esp int NOT NULL,
+    CONSTRAINT RAZAS_ESPECIES_fk FOREIGN KEY (id_esp) REFERENCES ESPECIES (id_esp)
 );
 
 -- MASCOTAS
 CREATE TABLE MASCOTAS (
-    id_mascot serial PRIMARY KEY NOT NULL,
-    id_raza int  NOT NULL,
-    img_mascot text  NOT NULL,
-    nom_mascot varchar(80)  NOT NULL,
-    edad_mascot int NULL,
-    fenac_mascot date NULL,
-    descrip_mascot text  NOT NULL,
-    gen_mascot boolean  NOT NULL,
-    esterilizado boolean  NOT NULL
+    id_ani serial PRIMARY KEY,
+    nom_mascot varchar(80) NOT NULL,
+    fechanac_mascot date NOT NULL,
+    esteril_mascot boolean NOT NULL,
+    sexo_mascot varchar(10) NOT NULL,
+    caract_mascot text NOT NULL,
+    fechaing_mascot date NOT NULL DEFAULT CURRENT_DATE,
+    id_raza int NOT NULL,
+    CONSTRAINT MASCOTAS_RAZAS_fk FOREIGN KEY (id_raza) REFERENCES RAZAS (id_raza)
 );
 
--- REFERENCES
+-- *****************
+-- *    SELECTS    *
+-- *****************
 
-ALTER TABLE USUARIOS ADD CONSTRAINT USUARIOS_REFUGIOS
-    FOREIGN KEY (id_refug)
-    REFERENCES REFUGIOS (id_refug)  
-    NOT DEFERRABLE 
-    INITIALLY IMMEDIATE
-;
+SELECT * FROM roles;
+SELECT * FROM permisos;
+SELECT * FROM rol_perm;
+SELECT * FROM usuarios;
+SELECT * FROM refugios;
+SELECT * FROM razas;
+SELECT * FROM especies;
+SELECT * FROM mascotas;
 
-ALTER TABLE USUARIOS ADD CONSTRAINT USUARIOS_ROLES
-    FOREIGN KEY (id_rol)
-    REFERENCES ROLES (id_rol)  
-    NOT DEFERRABLE 
-    INITIALLY IMMEDIATE
-;
-
-ALTER TABLE RAZAS ADD CONSTRAINT RAZAS_ESPECIES
-    FOREIGN KEY (id_espe)
-    REFERENCES ESPECIES (id_espe)  
-    NOT DEFERRABLE 
-    INITIALLY IMMEDIATE
-;
-
-ALTER TABLE MASCOTAS ADD CONSTRAINT MASCOTAS_RAZAS
-    FOREIGN KEY (id_raza)
-    REFERENCES RAZAS (id_raza)  
-    NOT DEFERRABLE 
-    INITIALLY IMMEDIATE
-;
-
--- INSERTS
+-- *****************
+-- *    INSERTS    *
+-- *****************
 
 -- ROLES
-INSERT INTO ROLES (nom_rol) VALUES
-('Superadmin'),
-('Administrador Refugio'),
-('Trabajador Refugio'),
-('Adoptante');
+INSERT INTO roles (codigo, nom_rol, descrip_rol) VALUES
+('admin-sistema', 'Administrador del sistema', 'Gestiona todo el sistema'),
+('admin-refugio', 'Administrador del refugio', 'Gestiona un refugio y su equipo'),
+('trabajador-refugio', 'Trabajador del refugio', 'Gestiona datos operativos del refugio'),
+('adoptante', 'Adoptante', 'Usuario que puede gestionar su propio perfil');
 
-SELECT * FROM ROLES;
-DELETE FROM ROLES;
+-- PERMISOS
+INSERT INTO permisos (codigo, nombre) VALUES
+('usuarios:crear', 'Crear usuarios'),
+('usuarios:obtener', 'Obtener usuarios'),
+('usuarios:modificar', 'Modificar usuarios'),
+('usuarios:eliminar', 'Eliminar usuarios'),
+('roles:crear', 'Crear roles'),
+('roles:obtener', 'Obtener roles'),
+('roles:modificar', 'Modificar roles'),
+('roles:eliminar', 'Eliminar roles'),
+('permisos:crear', 'Crear permisos'),
+('permisos:obtener', 'Obtener permisos'),
+('permisos:modificar', 'Modificar permisos'),
+('permisos:eliminar', 'Eliminar permisos'),
+('refugios:crear', 'Crear refugios'),
+('refugios:obtener', 'Obtener refugios'),
+('refugios:modificar', 'Modificar refugios'),
+('refugios:eliminar', 'Eliminar refugios'),
+('refugio:obtener:propio', 'Obtener refugio propio'),
+('refugio:modificar:propio', 'Modificar refugio propio'),
+('mascotas:crear', 'Crear mascotas'),
+('mascotas:obtener', 'Obtener mascotas'),
+('mascotas:modificar', 'Modificar mascotas'),
+('mascotas:eliminar', 'Eliminar mascotas'),
+('razas:crear', 'Crear razas'),
+('razas:obtener', 'Obtener razas'),
+('razas:modificar', 'Modificar razas'),
+('razas:eliminar', 'Eliminar razas'),
+('especies:crear', 'Crear especies'),
+('especies:obtener', 'Obtener especies'),
+('especies:modificar', 'Modificar especies'),
+('especies:eliminar', 'Eliminar especies'),
+('perfil:obtener', 'Obtener perfil propio'),
+('perfil:modificar', 'Modificar perfil propio'),
+('perfil:eliminar', 'Eliminar perfil propio'),
+('trabajadores:obtener', 'Obtener trabajadores'),
+('trabajadores:crear', 'Crear trabajadores'),
+('admins-sistema:crear', 'Crear administradores del sistema'),
+('admins-refugio:crear', 'Crear administradores del refugio');
+
+-- PERMISOS DEL ADMINISTRADOR DEL SISTEMA
+INSERT INTO rol_perm (id_rol, id_per)
+SELECT r.id_rol, p.id_per
+FROM roles r
+CROSS JOIN permisos p
+WHERE r.codigo = 'admin-sistema';
+
+-- PERMISOS DEL ADMINISTRADOR DEL REFUGIO
+INSERT INTO rol_perm (id_rol, id_per)
+SELECT r.id_rol, p.id_per
+FROM roles r
+JOIN permisos p ON p.codigo IN (
+    'perfil:obtener',
+    'perfil:modificar',
+    'refugio:obtener:propio',
+    'refugio:modificar:propio',
+    'mascotas:crear',
+    'mascotas:obtener',
+    'mascotas:modificar',
+    'mascotas:eliminar',
+    'razas:crear',
+    'razas:obtener',
+    'razas:modificar',
+    'razas:eliminar',
+    'especies:crear',
+    'especies:obtener',
+    'especies:modificar',
+    'especies:eliminar',
+    'trabajadores:obtener',
+    'trabajadores:crear'
+)
+WHERE r.codigo = 'admin-refugio';
+
+-- PERMISOS DEL TRABAJADOR DEL REFUGIO
+INSERT INTO rol_perm (id_rol, id_per)
+SELECT r.id_rol, p.id_per
+FROM roles r
+JOIN permisos p ON p.codigo IN (
+    'perfil:obtener',
+    'perfil:modificar',
+    'mascotas:crear',
+    'mascotas:obtener',
+    'mascotas:modificar',
+    'mascotas:eliminar',
+    'razas:crear',
+    'razas:obtener',
+    'razas:modificar',
+    'razas:eliminar',
+    'especies:crear',
+    'especies:obtener',
+    'especies:modificar',
+    'especies:eliminar'
+)
+WHERE r.codigo = 'trabajador-refugio';
+
+-- PERMISOS DEL ADOPTANTE
+INSERT INTO rol_perm (id_rol, id_per)
+SELECT r.id_rol, p.id_per
+FROM roles r
+JOIN permisos p ON p.codigo IN (
+    'perfil:obtener',
+    'perfil:modificar',
+    'perfil:eliminar'
+)
+WHERE r.codigo = 'adoptante';
 
 -- ESPECIES
-INSERT INTO ESPECIES (nom_espe) VALUES
+INSERT INTO especies (nom_esp) VALUES
 ('Perro'),
 ('Gato'),
 ('Conejo'),
 ('Ave');
 
 -- RAZAS
-INSERT INTO RAZAS (id_espe, nom_raza) VALUES
+INSERT INTO razas (id_esp, nom_raza) VALUES
 (1, 'Labrador'),
 (1, 'Golden Retriever'),
 (1, 'Bulldog'),
-(1, 'Pastor Alemán'),
+(1, 'Pastor Aleman'),
 (1, 'Chihuahua'),
 (2, 'Persa'),
-(2, 'Siamés'),
+(2, 'Siames'),
 (2, 'Maine Coon'),
-(2, 'Bengalí'),
-(3, 'Holandés'),
+(2, 'Bengali'),
+(3, 'Holandes'),
 (3, 'Angora'),
 (4, 'Canario'),
 (4, 'Periquito');
 
 -- REFUGIOS
-INSERT INTO REFUGIOS (nom_refug, dir_refug, telf_refug, corr_refug, contra_refug, licencia_refug) VALUES
-('Refugio Esperanza', 'Av. Los Pinos 123, La Paz', '77712345', 'esperanza@gmail.com', 'refug123', 'LIC-001-2024'),
-('Huellitas Felices', 'Calle Murillo 456, La Paz', '77798765', 'huellitas@gmail.com', 'refug456', 'LIC-002-2024'),
-('Patitas al Hogar', 'Av. Arce 789, La Paz', '77756789', 'patitas@gmail.com', 'refug789', 'LIC-003-2024');
+INSERT INTO refugios (nom_ref, direc_ref, telef_ref, email_ref, estado_ref) VALUES
+('Refugio Esperanza', 'Av. Los Pinos 123, La Paz', '77712345', 'esperanza@gmail.com', true),
+('Huellitas Felices', 'Calle Murillo 456, La Paz', '77798765', 'huellitas@gmail.com', true),
+('Patitas al Hogar', 'Av. Arce 789, La Paz', '77756789', 'patitas@gmail.com', true);
 
--- USUARIOS (administrador y refugios con id_refug, adoptantes sin refugio)
-INSERT INTO USUARIOS (id_rol, id_refug, telf_usuario, corr_usuario, contra_usuario, nom_usuario, apell_usuario, fenac_usuario, gen_usuario, direc_usuario) VALUES
--- Superadmin
-(1, NULL, '77711111', 'superadmin@gmail.com',  '$2b$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'Carlos',  'Mamani',  '1990-05-15', true,  'Av. 6 de Agosto 100, La Paz');
-
-SELECT * FROM USUARIOS;
-DELETE FROM USUARIOS;
+-- USUARIOS
+-- Password de ejemplo bcrypt para "password": $2b$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi
+INSERT INTO usuarios (nom_usu, apell_usu, fecnac_usu, numcel_usu, email_usu, pass_usu, id_rol, id_ref) VALUES
+('Carlos', 'Mamani', '1990-05-15', '77711111', 'superadmin@gmail.com', '$2b$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 1, NULL),
+('Ana', 'Quispe', '1992-04-10', '77722222', 'admin.refugio@gmail.com', '$2b$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 2, 1),
+('Luis', 'Choque', '1995-08-20', '77733333', 'trabajador@gmail.com', '$2b$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 3, 1),
+('Maria', 'Flores', '1998-11-05', '77744444', 'adoptante@gmail.com', '$2b$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 4, NULL);
 
 -- MASCOTAS
-INSERT INTO MASCOTAS (id_raza, img_mascot, nom_mascot, edad_mascot, fenac_mascot, descrip_mascot, gen_mascot, esterilizado) VALUES
-(1,  'labrador1.jpg',  'Max',   2, '2022-03-10', 'Perro muy juguetón y amigable, le encanta correr',    true,  false),
-(2,  'golden1.jpg',    'Luna',  1, '2023-06-15', 'Cachorra golden muy cariñosa y tranquila',             false, false),
-(3,  'bulldog1.jpg',   'Rocky', 3, '2021-09-20', 'Bulldog tranquilo, ideal para apartamentos',           true,  true),
-(4,  'pastor1.jpg',    'Rex',   5, '2019-04-22', 'Pastor alemán leal y protector',                       true,  true),
-(5,  'chihuahua1.jpg', 'Tito',  2, '2022-11-08', 'Chihuahua pequeño pero con mucha energía',             true,  false),
-(6,  'persa1.jpg',     'Mishi', 4, '2020-12-05', 'Gata persa muy elegante y calmada',                    false, true),
-(7,  'siames1.jpg',    'Nala',  2, '2022-08-18', 'Gata siamesa muy activa y sociable',                   false, false),
-(8,  'maincoon1.jpg',  'León',  3, '2021-05-30', 'Maine Coon grande y muy cariñoso',                     true,  true),
-(10, 'holandes1.jpg',  'Bunny', 1, '2023-11-01', 'Conejo holandés muy curioso y tierno',                 false, false),
-(12, 'canario1.jpg',   'Pío',   3, '2021-07-14', 'Canario con hermoso canto, muy alegre',                true,  false),
-(13, 'periquito1.jpg', 'Kiwi',  2, '2022-09-25', 'Periquito colorido y muy sociable con las personas',   true,  false);
+INSERT INTO mascotas (id_raza, nom_mascot, fechanac_mascot, esteril_mascot, sexo_mascot, caract_mascot, fechaing_mascot) VALUES
+(1, 'Max', '2022-03-10', false, 'Macho', 'Perro muy jugueton y amigable, le encanta correr', CURRENT_DATE),
+(2, 'Luna', '2023-06-15', false, 'Hembra', 'Cachorra golden muy carinosa y tranquila', CURRENT_DATE),
+(3, 'Rocky', '2021-09-20', true, 'Macho', 'Bulldog tranquilo, ideal para apartamentos', CURRENT_DATE),
+(4, 'Rex', '2019-04-22', true, 'Macho', 'Pastor aleman leal y protector', CURRENT_DATE),
+(5, 'Tito', '2022-11-08', false, 'Macho', 'Chihuahua pequeno pero con mucha energia', CURRENT_DATE),
+(6, 'Mishi', '2020-12-05', true, 'Hembra', 'Gata persa muy elegante y calmada', CURRENT_DATE),
+(7, 'Nala', '2022-08-18', false, 'Hembra', 'Gata siamesa muy activa y sociable', CURRENT_DATE),
+(8, 'Leon', '2021-05-30', true, 'Macho', 'Maine Coon grande y muy carinoso', CURRENT_DATE),
+(10, 'Bunny', '2023-11-01', false, 'Hembra', 'Conejo holandes muy curioso y tierno', CURRENT_DATE),
+(12, 'Pio', '2021-07-14', false, 'Macho', 'Canario con hermoso canto, muy alegre', CURRENT_DATE),
+(13, 'Kiwi', '2022-09-25', false, 'Macho', 'Periquito colorido y muy sociable con las personas', CURRENT_DATE);

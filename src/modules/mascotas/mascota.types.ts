@@ -1,31 +1,28 @@
 export interface Mascota {
-    id_mascot: number
-    id_raza: number
-    img_mascot: string
+    id_ani: number
     nom_mascot: string
-    edad_mascot: number
-    fenac_mascot: Date
-    descrip_mascot: string
-    gen_mascot: boolean
-    esterilizado: boolean
+    fechanac_mascot: Date | string
+    esteril_mascot: boolean
+    sexo_mascot: string
+    caract_mascot: string
+    fechaing_mascot: Date
+    id_raza: number
 }
 
 export interface CreateMascotaDto {
-    id_raza: number
-    img_mascot: string
     nom_mascot: string
-    edad_mascot?: number
-    fenac_mascot?: Date
-    descrip_mascot: string
-    gen_mascot: boolean
-    esterilizado: boolean
+    fechanac_mascot: Date
+    esteril_mascot: boolean
+    sexo_mascot: string
+    caract_mascot: string
+    id_raza: number
 }
 
 export interface UpdateMascotaDto {
-    img_mascot?: string
     nom_mascot?: string
-    edad_mascot?: number
-    fenac_mascot?: Date
-    descrip_mascot?: string
-    esterilizado?: boolean
+    fechanac_mascot?: Date | string
+    esteril_mascot?: boolean
+    sexo_mascot?: string
+    caract_mascot?: string
+    id_raza?: number
 }

@@ -22,7 +22,7 @@ export const AuthController = {
 
     registerWorker: async (req: Request, res: Response) => {
         try {
-            const adminRefugId = req.usuario?.id_refug ?? null
+            const adminRefugId = req.usuario?.id_ref ?? null
             const worker = await AuthService.registerWorker(req.body, adminRefugId)
             res.status(201).json({ message: 'Trabajador registrado correctamente', worker })
         } catch (error: any) {
@@ -33,7 +33,7 @@ export const AuthController = {
     registerSuperadmin: async (req: Request, res: Response) => {
         try {
             const usuario = await AuthService.registerSuperadmin(req.body)
-            res.status(201).json({ message: 'Superadmin registrado correctamente', usuario })
+            res.status(201).json({ message: 'Administrador del sistema registrado correctamente', usuario })
         } catch (error: any) {
             res.status(400).json({ message: error.message })
         }

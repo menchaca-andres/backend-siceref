@@ -11,7 +11,7 @@ export const RefugioService = {
     },
 
     create: async (data: CreateRefugioDto) => {
-        const existe = await RefugioModel.findByEmail(data.corr_refug)
+        const existe = await RefugioModel.findByEmail(data.email_ref)
         if (existe) throw new Error('El correo ya está registrado')
         return await RefugioModel.create(data)
     },

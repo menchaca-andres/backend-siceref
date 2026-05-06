@@ -1,29 +1,46 @@
 import bcrypt from 'bcrypt'
 import jwt from 'jsonwebtoken'
-import { pool } from '../../config/database'
+import { prisma } from '../../config/database'
 import { env } from '../../config/env'
+import { toDate } from '../../utils/date'
 import { LoginDto, JwtPayload, RegisterDto, RegisterWorkerDto } from './auth.types'
+
+const getRoleIdByCode = async (codigo: string) => {
+    const role = await prisma.roles.findUnique({ where: { codigo } })
+
+    if (!role) throw new Error(`Rol no configurado: ${codigo}`)
+    return role.id_rol
+}
+
+const usuarioSelect = {
+    id_usu: true,
+    nom_usu: true,
+    apell_usu: true,
+    fecnac_usu: true,
+    numcel_usu: true,
+    email_usu: true,
+    id_rol: true,
+    id_ref: true,
+    rol: true,
+    refugio: true,
+}
 
 export const AuthService = {
     login: async (data: LoginDto) => {
-        const result = await pool.query(`
-      SELECT u.*, r.nom_rol
-      FROM USUARIOS u
-      JOIN ROLES r ON u.id_rol = r.id_rol
-      WHERE u.corr_usuario = $1
-    `, [data.corr_usuario])
-
-        const usuario = result.rows[0]
+        const usuario = await prisma.usuarios.findUnique({
+            where: { email_usu: data.email_usu },
+            include: { rol: true },
+        })
         if (!usuario) throw new Error('Correo o contraseña incorrectos')
 
-        const passwordValido = await bcrypt.compare(data.contra_usuario, usuario.contra_usuario)
+        const passwordValido = await bcrypt.compare(data.pass_usu, usuario.pass_usu)
         if (!passwordValido) throw new Error('Correo o contraseña incorrectos')
 
         const payload: JwtPayload = {
-            id_usuario: usuario.id_usuario,
+            id_usu: usuario.id_usu,
             id_rol: usuario.id_rol,
-            nom_rol: usuario.nom_rol,
-            id_refug: usuario.id_refug,
+            nom_rol: usuario.rol.nom_rol,
+            id_ref: usuario.id_ref,
         }
 
         const token = jwt.sign(payload, env.jwt.secret, {
@@ -33,109 +50,69 @@ export const AuthService = {
         return {
             token,
             usuario: {
-                id_usuario: usuario.id_usuario,
-                nom_usuario: usuario.nom_usuario,
-                apell_usuario: usuario.apell_usuario,
-                corr_usuario: usuario.corr_usuario,
-                nom_rol: usuario.nom_rol,
-                id_refug: usuario.id_refug,
+                id_usu: usuario.id_usu,
+                nom_usu: usuario.nom_usu,
+                apell_usu: usuario.apell_usu,
+                email_usu: usuario.email_usu,
+                nom_rol: usuario.rol.nom_rol,
+                id_ref: usuario.id_ref,
             }
         }
     },
 
     register: async (data: RegisterDto) => {
-        const existe = await pool.query(
-            'SELECT * FROM USUARIOS WHERE corr_usuario = $1',
-            [data.corr_usuario]
-        )
-        if (existe.rows[0]) throw new Error('El correo ya está registrado')
+        const existe = await prisma.usuarios.findUnique({ where: { email_usu: data.email_usu } })
+        if (existe) throw new Error('El correo ya está registrado')
 
-        const hashPassword = await bcrypt.hash(data.contra_usuario, 10)
+        const hashPassword = await bcrypt.hash(data.pass_usu, 10)
+        const id_rol = await getRoleIdByCode('adoptante')
 
-        const result = await pool.query(`
-    INSERT INTO USUARIOS
-      (id_rol, id_refug, nom_usuario, apell_usuario, corr_usuario,
-       contra_usuario, telf_usuario, fenac_usuario, gen_usuario, direc_usuario)
-    VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)
-    RETURNING *
-  `, [
-            4, null, data.nom_usuario, data.apell_usuario, data.corr_usuario,
-            hashPassword, data.telf_usuario, data.fenac_usuario,
-            data.gen_usuario, data.direc_usuario
-        ])
-
-        return result.rows[0]
+        return await prisma.usuarios.create({
+            data: { ...data, fecnac_usu: toDate(data.fecnac_usu)!, pass_usu: hashPassword, id_rol, id_ref: null },
+            select: usuarioSelect,
+        })
     },
 
     registerWorker: async (data: RegisterWorkerDto, adminRefugId: number | null) => {
-        if (data.id_refug !== adminRefugId) {
+        if (adminRefugId === null || data.id_ref !== adminRefugId) {
             throw new Error('No puedes registrar trabajadores en otro refugio')
         }
 
-        const existe = await pool.query(
-            'SELECT * FROM USUARIOS WHERE corr_usuario = $1',
-            [data.corr_usuario]
-        )
-        if (existe.rows[0]) throw new Error('El correo ya está registrado')
+        const existe = await prisma.usuarios.findUnique({ where: { email_usu: data.email_usu } })
+        if (existe) throw new Error('El correo ya está registrado')
 
-        const hashPassword = await bcrypt.hash(data.contra_usuario, 10)
+        const hashPassword = await bcrypt.hash(data.pass_usu, 10)
+        const id_rol = await getRoleIdByCode('trabajador-refugio')
 
-        const result = await pool.query(`INSERT INTO USUARIOS
-        (id_rol, id_refug, nom_usuario, apell_usuario, corr_usuario,
-        contra_usuario, telf_usuario, fenac_usuario, gen_usuario, direc_usuario)
-        VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)
-        RETURNING *`, [
-            3, data.id_refug, data.nom_usuario, data.apell_usuario, data.corr_usuario,
-            hashPassword, data.telf_usuario, data.fenac_usuario,
-            data.gen_usuario, data.direc_usuario
-        ])
-
-        return result.rows[0]
+        return await prisma.usuarios.create({
+            data: { ...data, fecnac_usu: toDate(data.fecnac_usu)!, pass_usu: hashPassword, id_rol },
+            select: usuarioSelect,
+        })
     },
 
     registerSuperadmin: async (data: RegisterDto) => {
-        const existe = await pool.query(
-            'SELECT * FROM USUARIOS WHERE corr_usuario = $1',
-            [data.corr_usuario]
-        )
-        if (existe.rows[0]) throw new Error('El correo ya está registrado')
+        const existe = await prisma.usuarios.findUnique({ where: { email_usu: data.email_usu } })
+        if (existe) throw new Error('El correo ya está registrado')
 
-        const hashPassword = await bcrypt.hash(data.contra_usuario, 10)
+        const hashPassword = await bcrypt.hash(data.pass_usu, 10)
+        const id_rol = await getRoleIdByCode('admin-sistema')
 
-        const result = await pool.query(`INSERT INTO USUARIOS
-        (id_rol, id_refug, nom_usuario, apell_usuario, corr_usuario,
-        contra_usuario, telf_usuario, fenac_usuario, gen_usuario, direc_usuario)
-        VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)
-        RETURNING *`, [
-            1, null, data.nom_usuario, data.apell_usuario, data.corr_usuario,
-            hashPassword, data.telf_usuario, data.fenac_usuario,
-            data.gen_usuario, data.direc_usuario
-        ])
-
-        return result.rows[0]
+        return await prisma.usuarios.create({
+            data: { ...data, fecnac_usu: toDate(data.fecnac_usu)!, pass_usu: hashPassword, id_rol, id_ref: null },
+            select: usuarioSelect,
+        })
     },
 
     registerAdminRefugio: async (data: RegisterWorkerDto) => {
-        const existe = await pool.query(
-            'SELECT * FROM USUARIOS WHERE corr_usuario = $1',
-            [data.corr_usuario]
-        )
-        if (existe.rows[0]) throw new Error('El correo ya está registrado')
+        const existe = await prisma.usuarios.findUnique({ where: { email_usu: data.email_usu } })
+        if (existe) throw new Error('El correo ya está registrado')
 
-        const hashPassword = await bcrypt.hash(data.contra_usuario, 10)
+        const hashPassword = await bcrypt.hash(data.pass_usu, 10)
+        const id_rol = await getRoleIdByCode('admin-refugio')
 
-        const result = await pool.query(`
-    INSERT INTO USUARIOS
-      (id_rol, id_refug, nom_usuario, apell_usuario, corr_usuario,
-       contra_usuario, telf_usuario, fenac_usuario, gen_usuario, direc_usuario)
-    VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)
-    RETURNING *
-  `, [
-            2, data.id_refug, data.nom_usuario, data.apell_usuario, data.corr_usuario,
-            hashPassword, data.telf_usuario, data.fenac_usuario,
-            data.gen_usuario, data.direc_usuario
-        ])
-
-        return result.rows[0]
+        return await prisma.usuarios.create({
+            data: { ...data, fecnac_usu: toDate(data.fecnac_usu)!, pass_usu: hashPassword, id_rol },
+            select: usuarioSelect,
+        })
     },
 }

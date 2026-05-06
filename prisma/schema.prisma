@@ -7,30 +7,32 @@ datasource db {
   provider = "postgresql"
 }
 
-model ROLES {
+model roles {
   id_rol      Int        @id @default(autoincrement())
+  codigo      String     @unique @db.VarChar(50)
   nom_rol     String     @db.VarChar(50)
   descrip_rol String     @db.Text
-  rolPerms    ROL_PERM[]
-  usuarios    USUARIOS[]
+  rolPerms    rol_perm[]
+  usuarios    usuarios[]
 }
 
-model PERMISOS {
+model permisos {
   id_per   Int        @id @default(autoincrement())
+  codigo   String     @unique @db.VarChar(80)
   nombre   String     @db.VarChar(50)
-  rolPerms ROL_PERM[]
+  rolPerms rol_perm[]
 }
 
-model ROL_PERM {
+model rol_perm {
   id_rol  Int
   id_per  Int
-  rol     ROLES    @relation(fields: [id_rol], references: [id_rol])
-  permiso PERMISOS @relation(fields: [id_per], references: [id_per])
+  rol     roles    @relation(fields: [id_rol], references: [id_rol])
+  permiso permisos @relation(fields: [id_per], references: [id_per])
 
   @@id([id_rol, id_per])
 }
 
-model USUARIOS {
+model usuarios {
   id_usu     Int      @id @default(autoincrement())
   nom_usu    String   @db.VarChar(80)
   apell_usu  String   @db.VarChar(80)
@@ -40,37 +42,37 @@ model USUARIOS {
   pass_usu   String   @db.Text
 
   id_rol  Int
-  rol     ROLES     @relation(fields: [id_rol], references: [id_rol])
+  rol     roles     @relation(fields: [id_rol], references: [id_rol])
   id_ref  Int?
-  refugio REFUGIOS? @relation(fields: [id_ref], references: [id_ref])
+  refugio refugios? @relation(fields: [id_ref], references: [id_ref])
 }
 
-model REFUGIOS {
+model refugios {
   id_ref     Int        @id @default(autoincrement())
   nom_ref    String     @db.VarChar(80)
   direc_ref  String     @db.VarChar(150)
   telef_ref  String     @db.VarChar(20)
   email_ref  String     @unique @db.VarChar(80)
   estado_ref Boolean    @default(true)
-  usuarios   USUARIOS[]
+  usuarios   usuarios[]
 }
 
-model ESPECIES {
+model especies {
   id_esp  Int     @id @default(autoincrement())
   nom_esp String  @db.VarChar(50)
-  razas   RAZAS[]
+  razas   razas[]
 }
 
-model RAZAS {
+model razas {
   id_raza  Int    @id @default(autoincrement())
   nom_raza String @db.VarChar(50)
 
   id_esp   Int
-  especie  ESPECIES   @relation(fields: [id_esp], references: [id_esp])
-  mascotas MASCOTAS[]
+  especie  especies   @relation(fields: [id_esp], references: [id_esp])
+  mascotas mascotas[]
 }
 
-model MASCOTAS {
+model mascotas {
   id_ani Int @id @default(autoincrement())
 
   nom_mascot      String   @db.VarChar(80)
@@ -81,5 +83,5 @@ model MASCOTAS {
   fechaing_mascot DateTime @default(now()) @db.Date
 
   id_raza Int
-  raza    RAZAS @relation(fields: [id_raza], references: [id_raza])
+  raza    razas @relation(fields: [id_raza], references: [id_raza])
 }

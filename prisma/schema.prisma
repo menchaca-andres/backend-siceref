@@ -55,6 +55,7 @@ model refugios {
   email_ref  String     @unique @db.VarChar(80)
   estado_ref Boolean    @default(true)
   usuarios   usuarios[]
+  mascotas   mascotas[]
 }
 
 model especies {
@@ -84,4 +85,7 @@ model mascotas {
 
   id_raza Int
   raza    razas @relation(fields: [id_raza], references: [id_raza])
+
+  id_ref  Int
+  refugio refugios @relation(fields: [id_ref], references: [id_ref])
 }

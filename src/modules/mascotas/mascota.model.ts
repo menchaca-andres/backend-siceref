@@ -5,7 +5,7 @@ import { CreateMascotaDto, UpdateMascotaDto } from './mascota.types'
 export const MascotaModel = {
   findAll: async () => {
     return await prisma.mascotas.findMany({
-      include: { raza: { include: { especie: true } } },
+      include: { raza: { include: { especie: true } }, refugio: true },
       orderBy: { id_ani: 'asc' },
     })
   },
@@ -13,7 +13,7 @@ export const MascotaModel = {
   findById: async (id: number) => {
     return await prisma.mascotas.findUnique({
       where: { id_ani: id },
-      include: { raza: { include: { especie: true } } },
+      include: { raza: { include: { especie: true } }, refugio: true },
     })
   },
 

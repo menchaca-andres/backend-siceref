@@ -7,6 +7,7 @@ export interface Mascota {
     caract_mascot: string
     fechaing_mascot: Date
     id_raza: number
+    id_ref: number
 }
 
 export interface CreateMascotaDto {
@@ -16,6 +17,7 @@ export interface CreateMascotaDto {
     sexo_mascot: string
     caract_mascot: string
     id_raza: number
+    id_ref: number
 }
 
 export interface UpdateMascotaDto {
@@ -25,4 +27,5 @@ export interface UpdateMascotaDto {
     sexo_mascot?: string
     caract_mascot?: string
     id_raza?: number
+    id_ref?: number
 }

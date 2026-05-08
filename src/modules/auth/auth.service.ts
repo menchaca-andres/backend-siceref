@@ -29,7 +29,7 @@ export const AuthService = {
     login: async (data: LoginDto) => {
         const usuario = await prisma.usuarios.findUnique({
             where: { email_usu: data.email_usu },
-            include: { rol: true },
+            include: { rol: { include: { rolPerms: { include: { permiso: true } } } } },
         })
         if (!usuario) throw new Error('Correo o contraseña incorrectos')
 
@@ -56,6 +56,7 @@ export const AuthService = {
                 email_usu: usuario.email_usu,
                 nom_rol: usuario.rol.nom_rol,
                 id_ref: usuario.id_ref,
+                permisos: usuario.rol.rolPerms.map((rolPerm) => rolPerm.permiso.codigo),
             }
         }
     },

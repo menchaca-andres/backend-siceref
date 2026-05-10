@@ -77,6 +77,7 @@ model mascotas {
   id_ani Int @id @default(autoincrement())
 
   nom_mascot      String   @db.VarChar(80)
+  img_mascot      String   @db.Text
   fechanac_mascot DateTime @db.Date
   esteril_mascot  Boolean
   sexo_mascot     String   @db.VarChar(10)

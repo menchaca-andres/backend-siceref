@@ -1,12 +1,11 @@
 import { Request, Response } from 'express'
 import { MascotaService } from './mascota.service'
-import { RoleService } from '../roles/role.service'
 
 export const MascotaController = {
     getAll: async (req: Request, res: Response) => {
         try {
-            const roles = await MascotaService.getAll()
-            res.json(roles)
+            const mascotas = await MascotaService.getAll()
+            res.json(mascotas)
         } catch (error: any) {
             res.status(500).json({ message: error.message })
         }
@@ -14,8 +13,8 @@ export const MascotaController = {
 
     getById: async (req: Request, res: Response) => {
         try {
-            const role = await MascotaService.getById(Number(req.params.id))
-            res.json(role)
+            const mascota = await MascotaService.getById(Number(req.params.id))
+            res.json(mascota)
         } catch (error: any) {
             res.status(404).json({ message: error.message })
         }
@@ -23,8 +22,8 @@ export const MascotaController = {
 
     create: async (req: Request, res: Response) => {
         try {
-            const role = await MascotaService.create(req.body)
-            res.status(201).json(role)
+            const mascota = await MascotaService.create(req.body, req.file)
+            res.status(201).json(mascota)
         } catch (error: any) {
             res.status(400).json({ message: error.message })
         }
@@ -32,8 +31,8 @@ export const MascotaController = {
 
     update: async (req: Request, res: Response) => {
         try {
-            const role = await MascotaService.update(Number(req.params.id), req.body)
-            res.json(role)
+            const mascota = await MascotaService.update(Number(req.params.id), req.body, req.file)
+            res.json(mascota)
         } catch (error: any) {
             res.status(404).json({ message: error.message })
         }

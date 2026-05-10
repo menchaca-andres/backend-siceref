@@ -26,7 +26,11 @@ export const UsuarioService = {
     },
 
     update: async (id: number, data: UpdateUsuarioDto) => {
-        const usuario = await UsuarioModel.update(id, data)
+        const dataToUpdate = data.pass_usu
+            ? { ...data, pass_usu: await bcrypt.hash(data.pass_usu, 10) }
+            : data
+
+        const usuario = await UsuarioModel.update(id, dataToUpdate)
         if (!usuario) throw new Error('Usuario no encontrado')
         return usuario
     },

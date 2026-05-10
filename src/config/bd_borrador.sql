@@ -77,6 +77,7 @@ CREATE TABLE RAZAS (
 -- MASCOTAS
 CREATE TABLE MASCOTAS (
     id_ani serial PRIMARY KEY,
+    img_mascot text NOT NULL,
     nom_mascot varchar(80) NOT NULL,
     fechanac_mascot date NOT NULL,
     esteril_mascot boolean NOT NULL,

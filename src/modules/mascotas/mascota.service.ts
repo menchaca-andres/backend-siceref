@@ -12,7 +12,7 @@ const uploadMascotaImage = async (file: Express.Multer.File) => {
 }
 
 export const MascotaService = {
-  getAll: async () => await MascotaModel.findAll(),
+  getAll: async (id_ref?: number | null) => await MascotaModel.findAll(id_ref),
 
   getById: async (id: number) => {
     const mascota = await MascotaModel.findById(id)

@@ -3,8 +3,9 @@ import { toDate } from '../../utils/date'
 import { CreateMascotaDto, UpdateMascotaDto } from './mascota.types'
 
 export const MascotaModel = {
-  findAll: async () => {
+  findAll: async (id_ref?: number | null) => {
     return await prisma.mascotas.findMany({
+      where: id_ref != null ? { id_ref } : undefined,
       include: { raza: { include: { especie: true } }, refugio: true },
       orderBy: { id_ani: 'asc' },
     })

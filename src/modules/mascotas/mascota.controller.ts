@@ -4,7 +4,8 @@ import { MascotaService } from './mascota.service'
 export const MascotaController = {
     getAll: async (req: Request, res: Response) => {
         try {
-            const mascotas = await MascotaService.getAll()
+            const id_ref = req.usuario?.id_ref ?? null
+            const mascotas = await MascotaService.getAll(id_ref)
             res.json(mascotas)
         } catch (error: any) {
             res.status(500).json({ message: error.message })

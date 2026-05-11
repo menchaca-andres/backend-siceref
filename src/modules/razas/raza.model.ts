@@ -2,8 +2,9 @@ import { prisma } from '../../config/database'
 import { CreateRazaDto, UpdateRazaDto } from './raza.types'
 
 export const RazaModel = {
-    findAll: async () => {
+    findAll: async (id_ref?: number | null) => {
         return await prisma.razas.findMany({
+            where: id_ref != null ? { id_ref } : undefined,
             include: { especie: true },
             orderBy: { id_raza: 'asc' },
         })

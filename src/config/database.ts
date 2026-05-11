@@ -1,13 +1,12 @@
 import { PrismaPg } from '@prisma/adapter-pg'
 import { PrismaClient } from '../../generated/prisma/client'
-import { env } from './env'
 
 const adapter = new PrismaPg({
-    host: env.db.host,
-    port: env.db.port,
-    database: env.db.name,
-    user: env.db.user,
-    password: env.db.password,
+    host: process.env.DB_HOST || 'localhost',
+    port: Number(process.env.DB_PORT) || 5432,
+    database: process.env.DB_NAME || 'bd_siceref',
+    user: process.env.DB_USER || 'postgres',
+    password: process.env.DB_PASSWORD || 'admin',
 })
 
 export const prisma = new PrismaClient({ adapter })

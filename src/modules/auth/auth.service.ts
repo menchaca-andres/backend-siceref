@@ -1,7 +1,6 @@
 import bcrypt from 'bcrypt'
 import jwt from 'jsonwebtoken'
 import { prisma } from '../../config/database'
-import { env } from '../../config/env'
 import { toDate } from '../../utils/date'
 import { LoginDto, JwtPayload, RegisterDto, RegisterWorkerDto } from './auth.types'
 
@@ -43,8 +42,8 @@ export const AuthService = {
             id_ref: usuario.id_ref,
         }
 
-        const token = jwt.sign(payload, env.jwt.secret, {
-            expiresIn: env.jwt.expiresIn,
+        const token = jwt.sign(payload, process.env.JWT_SECRET || 'secret', {
+            expiresIn: (process.env.JWT_EXPIRES_IN || '8h') as jwt.SignOptions['expiresIn'],
         })
 
         return {

@@ -56,20 +56,30 @@ model refugios {
   estado_ref Boolean    @default(true)
   usuarios   usuarios[]
   mascotas   mascotas[]
+  especies   especies[]
+  razas      razas[]
 }
 
 model especies {
-  id_esp  Int     @id @default(autoincrement())
-  nom_esp String  @db.VarChar(50)
+  id_esp  Int      @id @default(autoincrement())
+  nom_esp String   @db.VarChar(50)
+
+  id_ref  Int
+  refugio refugios @relation(fields: [id_ref], references: [id_ref])
+
   razas   razas[]
 }
 
 model razas {
-  id_raza  Int    @id @default(autoincrement())
-  nom_raza String @db.VarChar(50)
+  id_raza  Int      @id @default(autoincrement())
+  nom_raza String   @db.VarChar(50)
 
   id_esp   Int
-  especie  especies   @relation(fields: [id_esp], references: [id_esp])
+  especie  especies @relation(fields: [id_esp], references: [id_esp])
+
+  id_ref   Int
+  refugio  refugios @relation(fields: [id_ref], references: [id_ref])
+
   mascotas mascotas[]
 }
 

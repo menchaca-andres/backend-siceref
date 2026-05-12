@@ -2,7 +2,9 @@
 -- *    TABLES     *
 -- *****************
 
+DROP TABLE IF EXISTS PUBLICACIONES;
 DROP TABLE IF EXISTS ROL_PERM;
+DROP TABLE IF EXISTS PUBLICACIONES;
 DROP TABLE IF EXISTS MASCOTAS;
 DROP TABLE IF EXISTS RAZAS;
 DROP TABLE IF EXISTS ESPECIES;
@@ -90,6 +92,17 @@ CREATE TABLE MASCOTAS (
     CONSTRAINT MASCOTAS_REFUGIOS_fk FOREIGN KEY (id_ref) REFERENCES REFUGIOS (id_ref)
 );
 
+-- PUBLICACIONES
+CREATE TABLE PUBLICACIONES (
+    id_publi serial PRIMARY KEY,
+    fechapubli date NOT NULL DEFAULT CURRENT_DATE,
+    estad_publ boolean NOT NULL DEFAULT true,
+    id_ani int NOT NULL,
+    id_ref int NOT NULL,
+    CONSTRAINT PUBLICACIONES_MASCOTAS_fk FOREIGN KEY (id_ani) REFERENCES MASCOTAS (id_ani),
+    CONSTRAINT PUBLICACIONES_REFUGIOS_fk FOREIGN KEY (id_ref) REFERENCES REFUGIOS (id_ref)
+);
+
 -- *****************
 -- *    SELECTS    *
 -- *****************
@@ -102,6 +115,7 @@ SELECT * FROM refugios;
 SELECT * FROM razas;
 SELECT * FROM especies;
 SELECT * FROM mascotas;
+SELECT * FROM publicaciones;
 
 -- *****************
 -- *    INSERTS    *
@@ -138,6 +152,10 @@ INSERT INTO permisos (codigo, nombre) VALUES
 ('mascotas:obtener', 'Obtener mascotas'),
 ('mascotas:modificar', 'Modificar mascotas'),
 ('mascotas:eliminar', 'Eliminar mascotas'),
+('publicaciones:crear', 'Crear publicaciones'),
+('publicaciones:obtener', 'Obtener publicaciones'),
+('publicaciones:modificar', 'Modificar publicaciones'),
+('publicaciones:eliminar', 'Eliminar publicaciones'),
 ('razas:crear', 'Crear razas'),
 ('razas:obtener', 'Obtener razas'),
 ('razas:modificar', 'Modificar razas'),
@@ -174,6 +192,10 @@ JOIN permisos p ON p.codigo IN (
     'mascotas:obtener',
     'mascotas:modificar',
     'mascotas:eliminar',
+    'publicaciones:crear',
+    'publicaciones:obtener',
+    'publicaciones:modificar',
+    'publicaciones:eliminar',
     'razas:crear',
     'razas:obtener',
     'razas:modificar',
@@ -198,6 +220,10 @@ JOIN permisos p ON p.codigo IN (
     'mascotas:obtener',
     'mascotas:modificar',
     'mascotas:eliminar',
+    'publicaciones:crear',
+    'publicaciones:obtener',
+    'publicaciones:modificar',
+    'publicaciones:eliminar',
     'razas:crear',
     'razas:obtener',
     'razas:modificar',
@@ -216,7 +242,8 @@ FROM roles r
 JOIN permisos p ON p.codigo IN (
     'perfil:obtener',
     'perfil:modificar',
-    'perfil:eliminar'
+    'perfil:eliminar',
+    'publicaciones:obtener'
 )
 WHERE r.codigo = 'adoptante';
 

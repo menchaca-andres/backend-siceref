@@ -48,37 +48,38 @@ model usuarios {
 }
 
 model refugios {
-  id_ref     Int        @id @default(autoincrement())
-  nom_ref    String     @db.VarChar(80)
-  direc_ref  String     @db.VarChar(150)
-  telef_ref  String     @db.VarChar(20)
-  email_ref  String     @unique @db.VarChar(80)
-  estado_ref Boolean    @default(true)
-  usuarios   usuarios[]
-  mascotas   mascotas[]
-  especies   especies[]
-  razas      razas[]
+  id_ref        Int             @id @default(autoincrement())
+  nom_ref       String          @db.VarChar(80)
+  direc_ref     String          @db.VarChar(150)
+  telef_ref     String          @db.VarChar(20)
+  email_ref     String          @unique @db.VarChar(80)
+  estado_ref    Boolean         @default(true)
+  usuarios      usuarios[]
+  mascotas      mascotas[]
+  especies      especies[]
+  razas         razas[]
+  publicaciones publicaciones[]
 }
 
 model especies {
-  id_esp  Int      @id @default(autoincrement())
-  nom_esp String   @db.VarChar(50)
+  id_esp  Int    @id @default(autoincrement())
+  nom_esp String @db.VarChar(50)
 
   id_ref  Int
   refugio refugios @relation(fields: [id_ref], references: [id_ref])
 
-  razas   razas[]
+  razas razas[]
 }
 
 model razas {
-  id_raza  Int      @id @default(autoincrement())
-  nom_raza String   @db.VarChar(50)
+  id_raza  Int    @id @default(autoincrement())
+  nom_raza String @db.VarChar(50)
 
-  id_esp   Int
-  especie  especies @relation(fields: [id_esp], references: [id_esp])
+  id_esp  Int
+  especie especies @relation(fields: [id_esp], references: [id_esp])
 
-  id_ref   Int
-  refugio  refugios @relation(fields: [id_ref], references: [id_ref])
+  id_ref  Int
+  refugio refugios @relation(fields: [id_ref], references: [id_ref])
 
   mascotas mascotas[]
 }
@@ -96,6 +97,21 @@ model mascotas {
 
   id_raza Int
   raza    razas @relation(fields: [id_raza], references: [id_raza])
+
+  id_ref  Int
+  refugio refugios @relation(fields: [id_ref], references: [id_ref])
+
+  publicaciones publicaciones[]
+}
+
+model publicaciones {
+  id_publi Int @id @default(autoincrement())
+
+  fechapubli DateTime @default(now()) @db.Date
+  estad_publ Boolean  @default(true)
+
+  id_ani  Int
+  mascota mascotas @relation(fields: [id_ani], references: [id_ani])
 
   id_ref  Int
   refugio refugios @relation(fields: [id_ref], references: [id_ref])

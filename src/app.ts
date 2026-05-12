@@ -8,6 +8,7 @@ import mascotaRoutes from './modules/mascotas/mascota.routes'
 import refugioRoutes from './modules/refugios/refugio.routes'
 import authRoutes from './modules/auth/auth.routes'
 import permisoRoutes from './modules/permisos/permiso.routes'
+import publicacionRoutes from './modules/publicaciones/publicacion.routes'
 
 const app = express()
 
@@ -26,6 +27,7 @@ app.use('/api/razas', razaRoutes)
 app.use('/api/usuarios', usuarioRoutes)
 app.use('/api/mascotas', mascotaRoutes)
 app.use('/api/refugios', refugioRoutes)
+app.use('/api/publicaciones', publicacionRoutes)
 app.use('/api/auth', authRoutes)
 
 export default app

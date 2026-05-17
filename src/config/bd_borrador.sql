@@ -211,14 +211,8 @@ JOIN permisos p ON p.codigo IN (
     'publicaciones:obtener',
     'publicaciones:modificar',
     'publicaciones:eliminar',
-    'razas:crear',
     'razas:obtener',
-    'razas:modificar',
-    'razas:eliminar',
-    'especies:crear',
     'especies:obtener',
-    'especies:modificar',
-    'especies:eliminar',
     'tamanios:obtener',
     'trabajadores:obtener',
     'trabajadores:crear'
@@ -240,14 +234,8 @@ JOIN permisos p ON p.codigo IN (
     'publicaciones:obtener',
     'publicaciones:modificar',
     'publicaciones:eliminar',
-    'razas:crear',
     'razas:obtener',
-    'razas:modificar',
-    'razas:eliminar',
-    'especies:crear',
     'especies:obtener',
-    'especies:modificar',
-    'especies:eliminar',
     'tamanios:obtener'
 )
 WHERE r.codigo = 'trabajador-refugio';
@@ -306,4 +294,3 @@ INSERT INTO usuarios (nom_usu, apell_usu, fecnac_usu, numcel_usu, email_usu, pas
 ('Ana', 'Quispe', '1992-04-10', '77722222', 'admin.refugio@gmail.com', '$2b$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 2, 1),
 ('Luis', 'Choque', '1995-08-20', '77733333', 'trabajador@gmail.com', '$2b$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 3, 1),
 ('Maria', 'Flores', '1998-11-05', '77744444', 'adoptante@gmail.com', '$2b$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 4, NULL);
-

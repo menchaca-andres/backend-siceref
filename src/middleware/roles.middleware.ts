@@ -40,6 +40,31 @@ export const autorizar = (...permisosRequeridos: string[]) => {
     }
 }
 
+export const autorizarRol = (...rolesPermitidos: string[]) => {
+    return async (req: Request, res: Response, next: NextFunction) => {
+        if (!req.usuario) {
+            res.status(401).json({ message: 'No autenticado' })
+            return
+        }
+
+        const rol = await prisma.roles.findUnique({ where: { id_rol: req.usuario.id_rol } }).catch(() => null)
+
+        if (!rol) {
+            res.status(500).json({ message: 'No se pudo validar el rol' })
+            return
+        }
+
+        const autorizado = rolesPermitidos.some((codigo) => codigo.toLowerCase() === rol.codigo.toLowerCase())
+
+        if (!autorizado) {
+            res.status(403).json({ message: 'No tienes permisos para esta acción' })
+            return
+        }
+
+        next()
+    }
+}
+
 export const autorizarAlguno = (...permisosPermitidos: string[]) => {
     return async (req: Request, res: Response, next: NextFunction) => {
         if (!req.usuario) {

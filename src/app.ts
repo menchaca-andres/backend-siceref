@@ -9,6 +9,7 @@ import refugioRoutes from './modules/refugios/refugio.routes'
 import authRoutes from './modules/auth/auth.routes'
 import permisoRoutes from './modules/permisos/permiso.routes'
 import publicacionRoutes from './modules/publicaciones/publicacion.routes'
+import tamanioRoutes from './modules/tamanios/tamanio.routes'
 
 const app = express()
 
@@ -26,6 +27,7 @@ app.use('/api/especies', especieRoutes)
 app.use('/api/razas', razaRoutes)
 app.use('/api/usuarios', usuarioRoutes)
 app.use('/api/mascotas', mascotaRoutes)
+app.use('/api/tamanios', tamanioRoutes)
 app.use('/api/refugios', refugioRoutes)
 app.use('/api/publicaciones', publicacionRoutes)
 app.use('/api/auth', authRoutes)

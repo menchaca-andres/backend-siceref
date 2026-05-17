@@ -6,7 +6,7 @@ export const MascotaModel = {
   findAll: async (id_ref?: number | null) => {
     return await prisma.mascotas.findMany({
       where: id_ref != null ? { id_ref } : undefined,
-      include: { raza: { include: { especie: true } }, refugio: true },
+      include: { raza: { include: { especie: true } }, tamano: true, refugio: true },
       orderBy: { id_ani: 'asc' },
     })
   },
@@ -14,7 +14,7 @@ export const MascotaModel = {
   findById: async (id: number) => {
     return await prisma.mascotas.findUnique({
       where: { id_ani: id },
-      include: { raza: { include: { especie: true } }, refugio: true },
+      include: { raza: { include: { especie: true } }, tamano: true, refugio: true },
     })
   },
 
@@ -28,6 +28,7 @@ export const MascotaModel = {
         sexo_mascot: data.sexo_mascot,
         caract_mascot: data.caract_mascot,
         id_raza: Number(data.id_raza),
+        id_tam: Number(data.id_tam),
         id_ref: Number(data.id_ref),
       },
     })
@@ -43,6 +44,7 @@ export const MascotaModel = {
           ? undefined
           : data.esteril_mascot === true || data.esteril_mascot === 'true',
         id_raza: data.id_raza === undefined ? undefined : Number(data.id_raza),
+        id_tam: data.id_tam === undefined ? undefined : Number(data.id_tam),
         id_ref: data.id_ref === undefined ? undefined : Number(data.id_ref),
       },
     }).catch(() => null)

@@ -13,7 +13,7 @@ export const PublicacionModel = {
                 ...(id_ref != null ? { id_ref } : {}),
                 ...(id_ani !== undefined ? { id_ani } : {}),
             },
-            include: { mascota: { include: { raza: { include: { especie: true } } } }, refugio: true },
+            include: { mascota: { include: { raza: { include: { especie: true } }, tamano: true } }, refugio: true },
             orderBy: { id_publi: 'asc' },
         })
     },
@@ -21,7 +21,7 @@ export const PublicacionModel = {
     findById: async (id: number) => {
         return await prisma.publicaciones.findUnique({
             where: { id_publi: id },
-            include: { mascota: { include: { raza: { include: { especie: true } } } }, refugio: true },
+            include: { mascota: { include: { raza: { include: { especie: true } }, tamano: true } }, refugio: true },
         })
     },
 

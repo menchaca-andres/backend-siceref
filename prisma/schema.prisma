@@ -84,6 +84,14 @@ model razas {
   mascotas mascotas[]
 }
 
+model tamanios {
+  id_tam     Int     @id @default(autoincrement())
+  nom_tam    String  @unique @db.VarChar(50)
+  estado_tam Boolean @default(true)
+
+  mascotas mascotas[]
+}
+
 model mascotas {
   id_ani Int @id @default(autoincrement())
 
@@ -97,6 +105,9 @@ model mascotas {
 
   id_raza Int
   raza    razas @relation(fields: [id_raza], references: [id_raza])
+
+  id_tam Int
+  tamano tamanios @relation(fields: [id_tam], references: [id_tam])
 
   id_ref  Int
   refugio refugios @relation(fields: [id_ref], references: [id_ref])

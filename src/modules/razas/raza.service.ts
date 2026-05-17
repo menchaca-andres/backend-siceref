@@ -2,8 +2,8 @@ import { RazaModel } from './raza.model'
 import { CreateRazaDto, UpdateRazaDto } from './raza.types'
 
 export const RazaService = {
-    getAll: async (id_ref?: number | null) => {
-        return await RazaModel.findAll(id_ref)
+    getAll: async () => {
+        return await RazaModel.findAll()
     },
 
     getById: async (id: number) => {

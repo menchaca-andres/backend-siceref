@@ -4,8 +4,7 @@ import { RazaService } from './raza.service'
 export const RazaController = {
     getAll: async (req: Request, res: Response) => {
         try {
-            const id_ref = req.usuario?.id_ref ?? null
-            const razas = await RazaService.getAll(id_ref)
+            const razas = await RazaService.getAll()
             res.json(razas)
         } catch (error: any) {
             res.status(500).json({ message: error.message })
@@ -23,9 +22,7 @@ export const RazaController = {
 
     create: async (req: Request, res: Response) => {
         try {
-            const id_ref = req.usuario?.id_ref
-            if (!id_ref) return res.status(403).json({ message: 'No tienes un refugio asignado' })
-            const raza = await RazaService.create({ ...req.body, id_ref })
+            const raza = await RazaService.create(req.body)
             res.status(201).json(raza)
         } catch (error: any) {
             res.status(400).json({ message: error.message })

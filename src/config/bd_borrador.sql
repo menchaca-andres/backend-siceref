@@ -6,6 +6,7 @@ DROP TABLE IF EXISTS PUBLICACIONES;
 DROP TABLE IF EXISTS ROL_PERM;
 DROP TABLE IF EXISTS PUBLICACIONES;
 DROP TABLE IF EXISTS MASCOTAS;
+DROP TABLE IF EXISTS TAMANIOS;
 DROP TABLE IF EXISTS RAZAS;
 DROP TABLE IF EXISTS ESPECIES;
 DROP TABLE IF EXISTS USUARIOS;
@@ -76,6 +77,13 @@ CREATE TABLE RAZAS (
     CONSTRAINT RAZAS_ESPECIES_fk FOREIGN KEY (id_esp) REFERENCES ESPECIES (id_esp)
 );
 
+-- TAMANIOS
+CREATE TABLE TAMANIOS (
+    id_tam serial PRIMARY KEY,
+    nom_tam varchar(50) NOT NULL UNIQUE,
+    estado_tam boolean NOT NULL DEFAULT true
+);
+
 -- MASCOTAS
 CREATE TABLE MASCOTAS (
     id_ani serial PRIMARY KEY,
@@ -87,8 +95,10 @@ CREATE TABLE MASCOTAS (
     caract_mascot text NOT NULL,
     fechaing_mascot date NOT NULL DEFAULT CURRENT_DATE,
     id_raza int NOT NULL,
+    id_tam int NOT NULL,
     id_ref int NOT NULL,
     CONSTRAINT MASCOTAS_RAZAS_fk FOREIGN KEY (id_raza) REFERENCES RAZAS (id_raza),
+    CONSTRAINT MASCOTAS_TAMANIOS_fk FOREIGN KEY (id_tam) REFERENCES TAMANIOS (id_tam),
     CONSTRAINT MASCOTAS_REFUGIOS_fk FOREIGN KEY (id_ref) REFERENCES REFUGIOS (id_ref)
 );
 
@@ -114,6 +124,7 @@ SELECT * FROM usuarios;
 SELECT * FROM refugios;
 SELECT * FROM razas;
 SELECT * FROM especies;
+SELECT * FROM tamanios;
 SELECT * FROM mascotas;
 SELECT * FROM publicaciones;
 
@@ -164,6 +175,10 @@ INSERT INTO permisos (codigo, nombre) VALUES
 ('especies:obtener', 'Obtener especies'),
 ('especies:modificar', 'Modificar especies'),
 ('especies:eliminar', 'Eliminar especies'),
+('tamanios:crear', 'Crear tamaños'),
+('tamanios:obtener', 'Obtener tamaños'),
+('tamanios:modificar', 'Modificar tamaños'),
+('tamanios:eliminar', 'Eliminar tamaños'),
 ('perfil:obtener', 'Obtener perfil propio'),
 ('perfil:modificar', 'Modificar perfil propio'),
 ('perfil:eliminar', 'Eliminar perfil propio'),
@@ -204,6 +219,7 @@ JOIN permisos p ON p.codigo IN (
     'especies:obtener',
     'especies:modificar',
     'especies:eliminar',
+    'tamanios:obtener',
     'trabajadores:obtener',
     'trabajadores:crear'
 )
@@ -231,7 +247,8 @@ JOIN permisos p ON p.codigo IN (
     'especies:crear',
     'especies:obtener',
     'especies:modificar',
-    'especies:eliminar'
+    'especies:eliminar',
+    'tamanios:obtener'
 )
 WHERE r.codigo = 'trabajador-refugio';
 
@@ -270,6 +287,12 @@ INSERT INTO razas (id_esp, nom_raza) VALUES
 (4, 'Canario'),
 (4, 'Periquito');
 
+-- TAMANIOS
+INSERT INTO tamanios (nom_tam, estado_tam) VALUES
+('Pequeño', true),
+('Mediano', true),
+('Grande', true);
+
 -- REFUGIOS
 INSERT INTO refugios (nom_ref, direc_ref, telef_ref, email_ref, estado_ref) VALUES
 ('Refugio Esperanza', 'Av. Los Pinos 123, La Paz', '77712345', 'esperanza@gmail.com', true),
@@ -284,16 +307,3 @@ INSERT INTO usuarios (nom_usu, apell_usu, fecnac_usu, numcel_usu, email_usu, pas
 ('Luis', 'Choque', '1995-08-20', '77733333', 'trabajador@gmail.com', '$2b$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 3, 1),
 ('Maria', 'Flores', '1998-11-05', '77744444', 'adoptante@gmail.com', '$2b$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 4, NULL);
 
--- MASCOTAS
-INSERT INTO mascotas (id_raza, id_ref, nom_mascot, fechanac_mascot, esteril_mascot, sexo_mascot, caract_mascot, fechaing_mascot) VALUES
-(1, 1, 'Max', '2022-03-10', false, 'Macho', 'Perro muy jugueton y amigable, le encanta correr', CURRENT_DATE),
-(2, 1, 'Luna', '2023-06-15', false, 'Hembra', 'Cachorra golden muy carinosa y tranquila', CURRENT_DATE),
-(3, 1, 'Rocky', '2021-09-20', true, 'Macho', 'Bulldog tranquilo, ideal para apartamentos', CURRENT_DATE),
-(4, 2, 'Rex', '2019-04-22', true, 'Macho', 'Pastor aleman leal y protector', CURRENT_DATE),
-(5, 2, 'Tito', '2022-11-08', false, 'Macho', 'Chihuahua pequeno pero con mucha energia', CURRENT_DATE),
-(6, 2, 'Mishi', '2020-12-05', true, 'Hembra', 'Gata persa muy elegante y calmada', CURRENT_DATE),
-(7, 3, 'Nala', '2022-08-18', false, 'Hembra', 'Gata siamesa muy activa y sociable', CURRENT_DATE),
-(8, 3, 'Leon', '2021-05-30', true, 'Macho', 'Maine Coon grande y muy carinoso', CURRENT_DATE),
-(10, 3, 'Bunny', '2023-11-01', false, 'Hembra', 'Conejo holandes muy curioso y tierno', CURRENT_DATE),
-(12, 1, 'Pio', '2021-07-14', false, 'Macho', 'Canario con hermoso canto, muy alegre', CURRENT_DATE),
-(13, 2, 'Kiwi', '2022-09-25', false, 'Macho', 'Periquito colorido y muy sociable con las personas', CURRENT_DATE);

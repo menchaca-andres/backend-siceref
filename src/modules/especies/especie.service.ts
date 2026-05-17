@@ -2,7 +2,7 @@ import { EspecieModel } from './especie.model'
 import { CreateEspecieDto, UpdateEspecieDto } from './especie.types'
 
 export const EspecieService = {
-    getAll: async (id_ref?: number | null) => await EspecieModel.findAll(id_ref),
+    getAll: async () => await EspecieModel.findAll(),
 
     getById: async (id: number) => {
         const especie = await EspecieModel.findById(id)

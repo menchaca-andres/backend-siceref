@@ -2,9 +2,8 @@ import { prisma } from '../../config/database'
 import { CreateEspecieDto, UpdateEspecieDto } from './especie.types'
 
 export const EspecieModel = {
-    findAll: async (id_ref?: number | null) => {
+    findAll: async () => {
         return await prisma.especies.findMany({
-            where: id_ref != null ? { id_ref } : undefined,
             orderBy: { id_esp: 'asc' },
         })
     },

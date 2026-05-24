@@ -5,6 +5,7 @@ import { autorizar, autorizarRol } from '../../middleware/roles.middleware'
 
 const router = Router()
 
+router.get('/public', EspecieController.getAll)
 router.get('/', verificarToken, autorizar('especies:obtener'), EspecieController.getAll)
 router.get('/:id', verificarToken, autorizar('especies:obtener'), EspecieController.getById)
 router.post('/', verificarToken, autorizarRol('admin-sistema'), autorizar('especies:crear'), EspecieController.create)

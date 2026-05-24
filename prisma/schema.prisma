@@ -7,6 +7,10 @@ datasource db {
   provider = "postgresql"
 }
 
+enum tipo_notificacion {
+  MENSAJE_CHAT
+}
+
 model roles {
   id_rol      Int        @id @default(autoincrement())
   codigo      String     @unique @db.VarChar(50)
@@ -41,10 +45,14 @@ model usuarios {
   email_usu  String   @unique @db.VarChar(80)
   pass_usu   String   @db.Text
 
-  id_rol  Int
-  rol     roles     @relation(fields: [id_rol], references: [id_rol])
-  id_ref  Int?
-  refugio refugios? @relation(fields: [id_ref], references: [id_ref])
+  id_rol         Int
+  rol            roles            @relation(fields: [id_rol], references: [id_rol])
+  id_ref         Int?
+  refugio        refugios?        @relation(fields: [id_ref], references: [id_ref])
+  notificaciones              notificaciones[]
+  mensajes_chat               mensajes_chat[]
+  conversaciones              conversaciones[]  @relation("ConversacionAdoptante")
+  conversaciones_responsables conversaciones[]  @relation("ConversacionResponsable")
 }
 
 model refugios {
@@ -118,4 +126,57 @@ model publicaciones {
 
   id_ref  Int
   refugio refugios @relation(fields: [id_ref], references: [id_ref])
+
+  notificaciones notificaciones[]
+  conversaciones  conversaciones[]
+}
+
+model notificaciones {
+  id_noti Int @id @default(autoincrement())
+
+  id_destinatario Int
+  destinatario    usuarios @relation(fields: [id_destinatario], references: [id_usu])
+
+  id_publi    Int?
+  publicacion publicaciones? @relation(fields: [id_publi], references: [id_publi])
+
+  tipo        tipo_notificacion
+  titulo      String            @db.VarChar(120)
+  mensaje     String            @db.Text
+  leida       Boolean           @default(false)
+  fecha_noti  DateTime          @default(now())
+  fecha_leida DateTime?
+}
+
+model conversaciones {
+  id_conv Int @id @default(autoincrement())
+
+  id_usu  Int
+  usuario usuarios @relation("ConversacionAdoptante", fields: [id_usu], references: [id_usu])
+
+  id_responsable  Int?
+  responsable     usuarios? @relation("ConversacionResponsable", fields: [id_responsable], references: [id_usu])
+
+  id_publi    Int
+  publicacion publicaciones @relation(fields: [id_publi], references: [id_publi])
+
+  fecha_creacion DateTime @default(now())
+
+  mensajes mensajes_chat[]
+
+  @@unique([id_usu, id_publi])
+}
+
+model mensajes_chat {
+  id_msj Int @id @default(autoincrement())
+
+  id_conv      Int
+  conversacion conversaciones @relation(fields: [id_conv], references: [id_conv])
+
+  id_remitente Int
+  remitente    usuarios @relation(fields: [id_remitente], references: [id_usu])
+
+  contenido String   @db.Text
+  fecha_msj DateTime @default(now())
+  leido     Boolean  @default(false)
 }

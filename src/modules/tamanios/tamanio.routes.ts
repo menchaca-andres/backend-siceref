@@ -5,6 +5,7 @@ import { autorizar } from '../../middleware/roles.middleware'
 
 const router = Router()
 
+router.get('/public', TamanioController.getAll)
 router.get('/', verificarToken, autorizar('tamanios:obtener'), TamanioController.getAll)
 router.get('/:id', verificarToken, autorizar('tamanios:obtener'), TamanioController.getById)
 router.post('/', verificarToken, autorizar('tamanios:crear'), TamanioController.create)

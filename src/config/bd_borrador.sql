@@ -2,7 +2,9 @@
 -- *    TABLES     *
 -- *****************
 
-DROP TABLE IF EXISTS PUBLICACIONES;
+DROP TABLE IF EXISTS MENSAJES_CHAT;
+DROP TABLE IF EXISTS CONVERSACIONES;
+DROP TABLE IF EXISTS NOTIFICACIONES;
 DROP TABLE IF EXISTS ROL_PERM;
 DROP TABLE IF EXISTS PUBLICACIONES;
 DROP TABLE IF EXISTS MASCOTAS;
@@ -13,6 +15,13 @@ DROP TABLE IF EXISTS USUARIOS;
 DROP TABLE IF EXISTS REFUGIOS;
 DROP TABLE IF EXISTS PERMISOS;
 DROP TABLE IF EXISTS ROLES;
+
+DROP TYPE IF EXISTS tipo_notificacion;
+
+-- ENUMS
+CREATE TYPE tipo_notificacion AS ENUM (
+    'MENSAJE_CHAT'
+);
 
 -- ROLES
 CREATE TABLE ROLES (
@@ -113,6 +122,46 @@ CREATE TABLE PUBLICACIONES (
     CONSTRAINT PUBLICACIONES_REFUGIOS_fk FOREIGN KEY (id_ref) REFERENCES REFUGIOS (id_ref)
 );
 
+-- NOTIFICACIONES
+CREATE TABLE NOTIFICACIONES (
+    id_noti serial PRIMARY KEY,
+    id_destinatario int NOT NULL,
+    id_publi int NULL,
+    tipo tipo_notificacion NOT NULL,
+    titulo varchar(120) NOT NULL,
+    mensaje text NOT NULL,
+    leida boolean NOT NULL DEFAULT false,
+    fecha_noti timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    fecha_leida timestamp NULL,
+    CONSTRAINT NOTIFICACIONES_USUARIOS_fk FOREIGN KEY (id_destinatario) REFERENCES USUARIOS (id_usu),
+    CONSTRAINT NOTIFICACIONES_PUBLICACIONES_fk FOREIGN KEY (id_publi) REFERENCES PUBLICACIONES (id_publi)
+);
+
+-- CONVERSACIONES
+CREATE TABLE CONVERSACIONES (
+    id_conv serial PRIMARY KEY,
+    id_usu int NOT NULL,
+    id_responsable int NULL,
+    id_publi int NOT NULL,
+    fecha_creacion timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT CONVERSACIONES_USUARIOS_fk FOREIGN KEY (id_usu) REFERENCES USUARIOS (id_usu),
+    CONSTRAINT CONVERSACIONES_RESPONSABLE_fk FOREIGN KEY (id_responsable) REFERENCES USUARIOS (id_usu),
+    CONSTRAINT CONVERSACIONES_PUBLICACIONES_fk FOREIGN KEY (id_publi) REFERENCES PUBLICACIONES (id_publi),
+    CONSTRAINT CONVERSACIONES_USUARIOS_PUBLICACIONES_uq UNIQUE (id_usu, id_publi)
+);
+
+-- MENSAJES_CHAT
+CREATE TABLE MENSAJES_CHAT (
+    id_msj serial PRIMARY KEY,
+    id_conv int NOT NULL,
+    id_remitente int NOT NULL,
+    contenido text NOT NULL,
+    fecha_msj timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    leido boolean NOT NULL DEFAULT false,
+    CONSTRAINT MENSAJES_CHAT_CONVERSACIONES_fk FOREIGN KEY (id_conv) REFERENCES CONVERSACIONES (id_conv),
+    CONSTRAINT MENSAJES_CHAT_USUARIOS_fk FOREIGN KEY (id_remitente) REFERENCES USUARIOS (id_usu)
+);
+
 -- *****************
 -- *    SELECTS    *
 -- *****************
@@ -127,6 +176,9 @@ SELECT * FROM especies;
 SELECT * FROM tamanios;
 SELECT * FROM mascotas;
 SELECT * FROM publicaciones;
+SELECT * FROM notificaciones;
+SELECT * FROM conversaciones;
+SELECT * FROM mensajes_chat;
 
 -- *****************
 -- *    INSERTS    *
@@ -185,7 +237,12 @@ INSERT INTO permisos (codigo, nombre) VALUES
 ('trabajadores:obtener', 'Obtener trabajadores'),
 ('trabajadores:crear', 'Crear trabajadores'),
 ('admins-sistema:crear', 'Crear administradores del sistema'),
-('admins-refugio:crear', 'Crear administradores del refugio');
+('admins-refugio:crear', 'Crear administradores del refugio'),
+('notificaciones:obtener', 'Obtener notificaciones'),
+('notificaciones:modificar', 'Modificar notificaciones'),
+('conversaciones:obtener', 'Obtener conversaciones'),
+('mensajes-chat:crear', 'Crear mensajes de chat'),
+('mensajes-chat:obtener', 'Obtener mensajes de chat');
 
 -- PERMISOS DEL ADMINISTRADOR DEL SISTEMA
 INSERT INTO rol_perm (id_rol, id_per)
@@ -215,7 +272,12 @@ JOIN permisos p ON p.codigo IN (
     'especies:obtener',
     'tamanios:obtener',
     'trabajadores:obtener',
-    'trabajadores:crear'
+    'trabajadores:crear',
+    'notificaciones:obtener',
+    'notificaciones:modificar',
+    'conversaciones:obtener',
+    'mensajes-chat:crear',
+    'mensajes-chat:obtener'
 )
 WHERE r.codigo = 'admin-refugio';
 
@@ -236,7 +298,12 @@ JOIN permisos p ON p.codigo IN (
     'publicaciones:eliminar',
     'razas:obtener',
     'especies:obtener',
-    'tamanios:obtener'
+    'tamanios:obtener',
+    'notificaciones:obtener',
+    'notificaciones:modificar',
+    'conversaciones:obtener',
+    'mensajes-chat:crear',
+    'mensajes-chat:obtener'
 )
 WHERE r.codigo = 'trabajador-refugio';
 
@@ -248,7 +315,12 @@ JOIN permisos p ON p.codigo IN (
     'perfil:obtener',
     'perfil:modificar',
     'perfil:eliminar',
-    'publicaciones:obtener'
+    'publicaciones:obtener',
+    'notificaciones:obtener',
+    'notificaciones:modificar',
+    'conversaciones:obtener',
+    'mensajes-chat:crear',
+    'mensajes-chat:obtener'
 )
 WHERE r.codigo = 'adoptante';
 

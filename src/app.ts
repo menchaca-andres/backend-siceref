@@ -10,6 +10,8 @@ import authRoutes from './modules/auth/auth.routes'
 import permisoRoutes from './modules/permisos/permiso.routes'
 import publicacionRoutes from './modules/publicaciones/publicacion.routes'
 import tamanioRoutes from './modules/tamanios/tamanio.routes'
+import notificacionRoutes from './modules/notificaciones/notificacion.routes'
+import conversacionRoutes from './modules/conversaciones/conversacion.routes'
 
 const app = express()
 
@@ -30,6 +32,8 @@ app.use('/api/mascotas', mascotaRoutes)
 app.use('/api/tamanios', tamanioRoutes)
 app.use('/api/refugios', refugioRoutes)
 app.use('/api/publicaciones', publicacionRoutes)
+app.use('/api/notificaciones', notificacionRoutes)
+app.use('/api/conversaciones', conversacionRoutes)
 app.use('/api/auth', authRoutes)
 
 export default app

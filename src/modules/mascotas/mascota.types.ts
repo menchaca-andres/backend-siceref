@@ -1,12 +1,13 @@
 export interface Mascota {
     id_ani: number
     nom_mascot: string
-    img_mascot: string
+    img_mascot: string | null
     fechanac_mascot: Date | string
     esteril_mascot: boolean
     sexo_mascot: string
     caract_mascot: string
     fechaing_mascot: Date
+    hist_mascot: string
     id_raza: number
     id_tam: number
     id_ref: number
@@ -19,6 +20,7 @@ export interface CreateMascotaDto {
     esteril_mascot: boolean | string
     sexo_mascot: string
     caract_mascot: string
+    hist_mascot: string
     id_raza: number | string
     id_tam: number | string
     id_ref: number | string
@@ -31,6 +33,7 @@ export interface UpdateMascotaDto {
     esteril_mascot?: boolean | string
     sexo_mascot?: string
     caract_mascot?: string
+    hist_mascot?: string
     id_raza?: number | string
     id_tam?: number | string
     id_ref?: number | string

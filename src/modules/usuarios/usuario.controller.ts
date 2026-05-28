@@ -31,7 +31,7 @@ export const UsuarioController = {
 
     create: async (req: Request, res: Response) => {
         try {
-            const usuario = await UsuarioService.create(req.body)
+            const usuario = await UsuarioService.create(req.body, req.file)
             res.status(201).json(usuario)
         } catch (error: any) {
             res.status(400).json({ message: error.message })
@@ -40,7 +40,7 @@ export const UsuarioController = {
 
     update: async (req: Request, res: Response) => {
         try {
-            const usuario = await UsuarioService.update(Number(req.params.id), req.body)
+            const usuario = await UsuarioService.update(Number(req.params.id), req.body, req.file)
             res.json(usuario)
         } catch (error: any) {
             res.status(404).json({ message: error.message })

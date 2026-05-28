@@ -22,11 +22,12 @@ export const MascotaModel = {
     return await prisma.mascotas.create({
       data: {
         nom_mascot: data.nom_mascot,
-        img_mascot: data.img_mascot!,
+        img_mascot: data.img_mascot,
         fechanac_mascot: toDate(data.fechanac_mascot)!,
         esteril_mascot: data.esteril_mascot === true || data.esteril_mascot === 'true',
         sexo_mascot: data.sexo_mascot,
         caract_mascot: data.caract_mascot,
+        hist_mascot: data.hist_mascot,
         id_raza: Number(data.id_raza),
         id_tam: Number(data.id_tam),
         id_ref: Number(data.id_ref),

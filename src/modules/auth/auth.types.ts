@@ -11,6 +11,7 @@ export interface JwtPayload {
 }
 
 export interface RegisterDto {
+    img_usu?: string
     nom_usu: string
     apell_usu: string
     email_usu: string
@@ -20,5 +21,5 @@ export interface RegisterDto {
 }
 
 export interface RegisterWorkerDto extends RegisterDto {
-    id_ref: number
+    id_ref: number | string
 }

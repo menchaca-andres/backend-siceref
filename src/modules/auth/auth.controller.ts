@@ -13,7 +13,7 @@ export const AuthController = {
 
     register: async (req: Request, res: Response) => {
         try {
-            const usuario = await AuthService.register(req.body)
+            const usuario = await AuthService.register(req.body, req.file)
             res.status(201).json({ message: 'Adoptante registrado correctamente', usuario })
         } catch (error: any) {
             res.status(400).json({ message: error.message })
@@ -23,7 +23,7 @@ export const AuthController = {
     registerWorker: async (req: Request, res: Response) => {
         try {
             const adminRefugId = req.usuario?.id_ref ?? null
-            const worker = await AuthService.registerWorker(req.body, adminRefugId)
+            const worker = await AuthService.registerWorker(req.body, adminRefugId, req.file)
             res.status(201).json({ message: 'Trabajador registrado correctamente', worker })
         } catch (error: any) {
             res.status(400).json({ message: error.message })
@@ -32,7 +32,7 @@ export const AuthController = {
 
     registerSuperadmin: async (req: Request, res: Response) => {
         try {
-            const usuario = await AuthService.registerSuperadmin(req.body)
+            const usuario = await AuthService.registerSuperadmin(req.body, req.file)
             res.status(201).json({ message: 'Administrador del sistema registrado correctamente', usuario })
         } catch (error: any) {
             res.status(400).json({ message: error.message })
@@ -41,7 +41,7 @@ export const AuthController = {
 
     registerAdminRefugio: async (req: Request, res: Response) => {
         try {
-            const usuario = await AuthService.registerAdminRefugio(req.body)
+            const usuario = await AuthService.registerAdminRefugio(req.body, req.file)
             res.status(201).json({ message: 'Administrador de refugio registrado correctamente', usuario })
         } catch (error: any) {
             res.status(400).json({ message: error.message })

@@ -4,6 +4,7 @@ import { CreateUsuarioDto, UpdateUsuarioDto } from './usuario.types'
 
 const usuarioSelect = {
   id_usu: true,
+  img_usu: true,
   nom_usu: true,
   apell_usu: true,
   fecnac_usu: true,
@@ -47,7 +48,17 @@ export const UsuarioModel = {
 
   create: async (data: CreateUsuarioDto) => {
     return await prisma.usuarios.create({
-      data: { ...data, fecnac_usu: toDate(data.fecnac_usu)!, id_ref: data.id_ref ?? null },
+      data: {
+        img_usu: data.img_usu,
+        nom_usu: data.nom_usu,
+        apell_usu: data.apell_usu,
+        fecnac_usu: toDate(data.fecnac_usu)!,
+        numcel_usu: data.numcel_usu,
+        email_usu: data.email_usu,
+        pass_usu: data.pass_usu,
+        id_rol: Number(data.id_rol),
+        id_ref: data.id_ref == null ? null : Number(data.id_ref),
+      },
       select: usuarioSelect,
     })
   },
@@ -55,7 +66,17 @@ export const UsuarioModel = {
   update: async (id: number, data: UpdateUsuarioDto) => {
     return await prisma.usuarios.update({
       where: { id_usu: id },
-      data: { ...data, fecnac_usu: toDate(data.fecnac_usu) },
+      data: {
+        img_usu: data.img_usu,
+        nom_usu: data.nom_usu,
+        apell_usu: data.apell_usu,
+        fecnac_usu: toDate(data.fecnac_usu),
+        numcel_usu: data.numcel_usu,
+        email_usu: data.email_usu,
+        pass_usu: data.pass_usu,
+        id_rol: data.id_rol === undefined ? undefined : Number(data.id_rol),
+        id_ref: data.id_ref === undefined || data.id_ref === null ? data.id_ref : Number(data.id_ref),
+      },
       select: usuarioSelect,
     }).catch(() => null)
   },

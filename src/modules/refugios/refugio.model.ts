@@ -15,11 +15,26 @@ export const RefugioModel = {
     },
 
     create: async (data: CreateRefugioDto) => {
-        return await prisma.refugios.create({ data })
+        return await prisma.refugios.create({
+            data: {
+                img_ref: data.img_ref,
+                nom_ref: data.nom_ref,
+                direc_ref: data.direc_ref,
+                telef_ref: data.telef_ref,
+                email_ref: data.email_ref,
+                estado_ref: data.estado_ref === undefined ? undefined : data.estado_ref === true || data.estado_ref === 'true',
+            },
+        })
     },
 
     update: async (id: number, data: UpdateRefugioDto) => {
-        return await prisma.refugios.update({ where: { id_ref: id }, data }).catch(() => null)
+        return await prisma.refugios.update({
+            where: { id_ref: id },
+            data: {
+                ...data,
+                estado_ref: data.estado_ref === undefined ? undefined : data.estado_ref === true || data.estado_ref === 'true',
+            },
+        }).catch(() => null)
     },
 
     delete: async (id: number) => {

@@ -22,7 +22,7 @@ export const RefugioController = {
 
     create: async (req: Request, res: Response) => {
         try {
-            const refugio = await RefugioService.create(req.body)
+            const refugio = await RefugioService.create(req.body, req.file)
             res.status(201).json(refugio)
         } catch (error: any) {
             res.status(400).json({ message: error.message })
@@ -31,7 +31,7 @@ export const RefugioController = {
 
     update: async (req: Request, res: Response) => {
         try {
-            const refugio = await RefugioService.update(Number(req.params.id), req.body)
+            const refugio = await RefugioService.update(Number(req.params.id), req.body, req.file)
             res.json(refugio)
         } catch (error: any) {
             res.status(404).json({ message: error.message })

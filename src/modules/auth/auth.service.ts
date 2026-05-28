@@ -3,6 +3,7 @@ import jwt from 'jsonwebtoken'
 import { prisma } from '../../config/database'
 import { toDate } from '../../utils/date'
 import { LoginDto, JwtPayload, RegisterDto, RegisterWorkerDto } from './auth.types'
+import { uploadImageToCloudinary } from '../../config/cloudinary'
 
 const getRoleIdByCode = async (codigo: string) => {
     const role = await prisma.roles.findUnique({ where: { codigo } })
@@ -13,6 +14,7 @@ const getRoleIdByCode = async (codigo: string) => {
 
 const usuarioSelect = {
     id_usu: true,
+    img_usu: true,
     nom_usu: true,
     apell_usu: true,
     fecnac_usu: true,
@@ -22,6 +24,10 @@ const usuarioSelect = {
     id_ref: true,
     rol: true,
     refugio: true,
+}
+
+const resolveUsuarioImage = async (data: RegisterDto, file?: Express.Multer.File) => {
+    return file ? await uploadImageToCloudinary(file, 'usuarios') : data.img_usu
 }
 
 export const AuthService = {
@@ -52,6 +58,7 @@ export const AuthService = {
                 id_usu: usuario.id_usu,
                 nom_usu: usuario.nom_usu,
                 apell_usu: usuario.apell_usu,
+                img_usu: usuario.img_usu,
                 email_usu: usuario.email_usu,
                 nom_rol: usuario.rol.nom_rol,
                 id_ref: usuario.id_ref,
@@ -60,58 +67,62 @@ export const AuthService = {
         }
     },
 
-    register: async (data: RegisterDto) => {
+    register: async (data: RegisterDto, file?: Express.Multer.File) => {
         const existe = await prisma.usuarios.findUnique({ where: { email_usu: data.email_usu } })
         if (existe) throw new Error('El correo ya está registrado')
 
+        const img_usu = await resolveUsuarioImage(data, file)
         const hashPassword = await bcrypt.hash(data.pass_usu, 10)
         const id_rol = await getRoleIdByCode('adoptante')
 
         return await prisma.usuarios.create({
-            data: { ...data, fecnac_usu: toDate(data.fecnac_usu)!, pass_usu: hashPassword, id_rol, id_ref: null },
+            data: { ...data, img_usu, fecnac_usu: toDate(data.fecnac_usu)!, pass_usu: hashPassword, id_rol, id_ref: null },
             select: usuarioSelect,
         })
     },
 
-    registerWorker: async (data: RegisterWorkerDto, adminRefugId: number | null) => {
-        if (adminRefugId === null || data.id_ref !== adminRefugId) {
+    registerWorker: async (data: RegisterWorkerDto, adminRefugId: number | null, file?: Express.Multer.File) => {
+        if (adminRefugId === null || Number(data.id_ref) !== adminRefugId) {
             throw new Error('No puedes registrar trabajadores en otro refugio')
         }
 
         const existe = await prisma.usuarios.findUnique({ where: { email_usu: data.email_usu } })
         if (existe) throw new Error('El correo ya está registrado')
 
+        const img_usu = await resolveUsuarioImage(data, file)
         const hashPassword = await bcrypt.hash(data.pass_usu, 10)
         const id_rol = await getRoleIdByCode('trabajador-refugio')
 
         return await prisma.usuarios.create({
-            data: { ...data, fecnac_usu: toDate(data.fecnac_usu)!, pass_usu: hashPassword, id_rol },
+            data: { ...data, img_usu, fecnac_usu: toDate(data.fecnac_usu)!, pass_usu: hashPassword, id_rol, id_ref: Number(data.id_ref) },
             select: usuarioSelect,
         })
     },
 
-    registerSuperadmin: async (data: RegisterDto) => {
+    registerSuperadmin: async (data: RegisterDto, file?: Express.Multer.File) => {
         const existe = await prisma.usuarios.findUnique({ where: { email_usu: data.email_usu } })
         if (existe) throw new Error('El correo ya está registrado')
 
+        const img_usu = await resolveUsuarioImage(data, file)
         const hashPassword = await bcrypt.hash(data.pass_usu, 10)
         const id_rol = await getRoleIdByCode('admin-sistema')
 
         return await prisma.usuarios.create({
-            data: { ...data, fecnac_usu: toDate(data.fecnac_usu)!, pass_usu: hashPassword, id_rol, id_ref: null },
+            data: { ...data, img_usu, fecnac_usu: toDate(data.fecnac_usu)!, pass_usu: hashPassword, id_rol, id_ref: null },
             select: usuarioSelect,
         })
     },
 
-    registerAdminRefugio: async (data: RegisterWorkerDto) => {
+    registerAdminRefugio: async (data: RegisterWorkerDto, file?: Express.Multer.File) => {
         const existe = await prisma.usuarios.findUnique({ where: { email_usu: data.email_usu } })
         if (existe) throw new Error('El correo ya está registrado')
 
+        const img_usu = await resolveUsuarioImage(data, file)
         const hashPassword = await bcrypt.hash(data.pass_usu, 10)
         const id_rol = await getRoleIdByCode('admin-refugio')
 
         return await prisma.usuarios.create({
-            data: { ...data, fecnac_usu: toDate(data.fecnac_usu)!, pass_usu: hashPassword, id_rol },
+            data: { ...data, img_usu, fecnac_usu: toDate(data.fecnac_usu)!, pass_usu: hashPassword, id_rol, id_ref: Number(data.id_ref) },
             select: usuarioSelect,
         })
     },

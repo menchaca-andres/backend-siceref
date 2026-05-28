@@ -1,6 +1,7 @@
 import { UsuarioModel } from './usuario.model'
 import { CreateUsuarioDto, UpdateUsuarioDto } from './usuario.types'
 import bcrypt from 'bcrypt'
+import { uploadImageToCloudinary } from '../../config/cloudinary'
 
 export const UsuarioService = {
     getAll: async () => await UsuarioModel.findAll(),
@@ -16,19 +17,22 @@ export const UsuarioService = {
         return usuario
     },
 
-    create: async (data: CreateUsuarioDto) => {
+    create: async (data: CreateUsuarioDto, file?: Express.Multer.File) => {
         const existe = await UsuarioModel.findByEmail(data.email_usu)
         if (existe) throw new Error('El correo ya está registrado')
 
+        const img_usu = file ? await uploadImageToCloudinary(file, 'usuarios') : data.img_usu
+
         const hashPassword = await bcrypt.hash(data.pass_usu, 10)
 
-        return await UsuarioModel.create({ ...data, pass_usu: hashPassword })
+        return await UsuarioModel.create({ ...data, img_usu, pass_usu: hashPassword })
     },
 
-    update: async (id: number, data: UpdateUsuarioDto) => {
+    update: async (id: number, data: UpdateUsuarioDto, file?: Express.Multer.File) => {
+        const img_usu = file ? await uploadImageToCloudinary(file, 'usuarios') : data.img_usu
         const dataToUpdate = data.pass_usu
-            ? { ...data, pass_usu: await bcrypt.hash(data.pass_usu, 10) }
-            : data
+            ? { ...data, img_usu, pass_usu: await bcrypt.hash(data.pass_usu, 10) }
+            : { ...data, img_usu }
 
         const usuario = await UsuarioModel.update(id, dataToUpdate)
         if (!usuario) throw new Error('Usuario no encontrado')

@@ -50,6 +50,7 @@ CREATE TABLE ROL_PERM (
 -- REFUGIOS
 CREATE TABLE REFUGIOS (
     id_ref serial PRIMARY KEY,
+    img_ref text NULL,
     nom_ref varchar(80) NOT NULL,
     direc_ref varchar(150) NOT NULL,
     telef_ref varchar(20) NOT NULL,
@@ -60,6 +61,7 @@ CREATE TABLE REFUGIOS (
 -- USUARIOS
 CREATE TABLE USUARIOS (
     id_usu serial PRIMARY KEY,
+    img_usu text NULL,
     nom_usu varchar(80) NOT NULL,
     apell_usu varchar(80) NOT NULL,
     fecnac_usu date NOT NULL,
@@ -96,13 +98,14 @@ CREATE TABLE TAMANIOS (
 -- MASCOTAS
 CREATE TABLE MASCOTAS (
     id_ani serial PRIMARY KEY,
-    img_mascot text NOT NULL,
+    img_mascot text NULL,
     nom_mascot varchar(80) NOT NULL,
     fechanac_mascot date NOT NULL,
     esteril_mascot boolean NOT NULL,
     sexo_mascot varchar(10) NOT NULL,
     caract_mascot text NOT NULL,
     fechaing_mascot date NOT NULL DEFAULT CURRENT_DATE,
+    hist_mascot text NOT NULL,
     id_raza int NOT NULL,
     id_tam int NOT NULL,
     id_ref int NOT NULL,

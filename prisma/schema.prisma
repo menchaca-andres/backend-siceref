@@ -38,6 +38,7 @@ model rol_perm {
 
 model usuarios {
   id_usu     Int      @id @default(autoincrement())
+  img_usu    String?  @db.Text
   nom_usu    String   @db.VarChar(80)
   apell_usu  String   @db.VarChar(80)
   fecnac_usu DateTime @db.Date
@@ -45,18 +46,19 @@ model usuarios {
   email_usu  String   @unique @db.VarChar(80)
   pass_usu   String   @db.Text
 
-  id_rol         Int
-  rol            roles            @relation(fields: [id_rol], references: [id_rol])
-  id_ref         Int?
-  refugio        refugios?        @relation(fields: [id_ref], references: [id_ref])
+  id_rol                      Int
+  rol                         roles            @relation(fields: [id_rol], references: [id_rol])
+  id_ref                      Int?
+  refugio                     refugios?        @relation(fields: [id_ref], references: [id_ref])
   notificaciones              notificaciones[]
   mensajes_chat               mensajes_chat[]
-  conversaciones              conversaciones[]  @relation("ConversacionAdoptante")
-  conversaciones_responsables conversaciones[]  @relation("ConversacionResponsable")
+  conversaciones              conversaciones[] @relation("ConversacionAdoptante")
+  conversaciones_responsables conversaciones[] @relation("ConversacionResponsable")
 }
 
 model refugios {
   id_ref        Int             @id @default(autoincrement())
+  img_ref       String?         @db.Text
   nom_ref       String          @db.VarChar(80)
   direc_ref     String          @db.VarChar(150)
   telef_ref     String          @db.VarChar(20)
@@ -96,12 +98,13 @@ model mascotas {
   id_ani Int @id @default(autoincrement())
 
   nom_mascot      String   @db.VarChar(80)
-  img_mascot      String   @db.Text
+  img_mascot      String?  @db.Text
   fechanac_mascot DateTime @db.Date
   esteril_mascot  Boolean
   sexo_mascot     String   @db.VarChar(10)
   caract_mascot   String   @db.Text
   fechaing_mascot DateTime @default(now()) @db.Date
+  hist_mascot     String   @db.Text
 
   id_raza Int
   raza    razas @relation(fields: [id_raza], references: [id_raza])
@@ -128,7 +131,7 @@ model publicaciones {
   refugio refugios @relation(fields: [id_ref], references: [id_ref])
 
   notificaciones notificaciones[]
-  conversaciones  conversaciones[]
+  conversaciones conversaciones[]
 }
 
 model notificaciones {
@@ -154,8 +157,8 @@ model conversaciones {
   id_usu  Int
   usuario usuarios @relation("ConversacionAdoptante", fields: [id_usu], references: [id_usu])
 
-  id_responsable  Int?
-  responsable     usuarios? @relation("ConversacionResponsable", fields: [id_responsable], references: [id_usu])
+  id_responsable Int?
+  responsable    usuarios? @relation("ConversacionResponsable", fields: [id_responsable], references: [id_usu])
 
   id_publi    Int
   publicacion publicaciones @relation(fields: [id_publi], references: [id_publi])

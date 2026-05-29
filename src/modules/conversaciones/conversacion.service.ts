@@ -1,6 +1,7 @@
 import { JwtPayload } from '../auth/auth.types'
 import { CreateMensajeDto } from './conversacion.types'
 import { ConversacionModel } from './conversacion.model'
+import { RealtimeService } from '../../services/realtime.service'
 
 const validarPublicacionDisponible = async (id_publi: number) => {
     const publicacion = await ConversacionModel.findPublicacionById(id_publi)
@@ -39,24 +40,43 @@ const asignarResponsableSiCorresponde = async (conversacion: Awaited<ReturnType<
 
 const notificarRefugio = async (id_ref: number, id_remitente: number, id_publi: number, nombreMascota: string, id_responsable: number | null) => {
     if (id_responsable !== null) {
-        await ConversacionModel.createNotificaciones([{
+        return await ConversacionModel.createNotificaciones([{
             id_destinatario: id_responsable,
             id_publi,
             tipo: 'MENSAJE_CHAT',
             titulo: 'Nuevo mensaje de adopcion',
             mensaje: `Nuevo mensaje sobre ${nombreMascota}`,
         }])
-        return
     }
 
     const destinatarios = await ConversacionModel.findUsuariosDelRefugio(id_ref, id_remitente)
-    await ConversacionModel.createNotificaciones(destinatarios.map((destinatario) => ({
+    return await ConversacionModel.createNotificaciones(destinatarios.map((destinatario) => ({
         id_destinatario: destinatario.id_usu,
         id_publi,
         tipo: 'MENSAJE_CHAT',
         titulo: 'Nuevo mensaje de adopcion',
         mensaje: `Nuevo mensaje sobre ${nombreMascota}`,
     })))
+}
+
+const emitirNotificaciones = (notificaciones: Awaited<ReturnType<typeof ConversacionModel.createNotificaciones>>) => {
+    notificaciones.forEach((notificacion) => {
+        RealtimeService.sendToUser(notificacion.id_destinatario, { type: 'notificacion', payload: notificacion })
+    })
+}
+
+const emitirMensaje = async (mensaje: unknown, id_remitente: number, conversacion: Awaited<ReturnType<typeof ConversacionModel.findById>>) => {
+    if (!conversacion) return
+
+    const destinatarios = new Set<number>([id_remitente, conversacion.id_usu])
+    if (conversacion.id_responsable !== null) destinatarios.add(conversacion.id_responsable)
+
+    if (conversacion.id_responsable === null) {
+        const usuariosRefugio = await ConversacionModel.findUsuariosDelRefugio(conversacion.publicacion.id_ref, id_remitente)
+        usuariosRefugio.forEach((usuario) => destinatarios.add(usuario.id_usu))
+    }
+
+    RealtimeService.sendToUsers([...destinatarios], { type: 'mensaje_chat', payload: mensaje })
 }
 
 export const ConversacionService = {
@@ -84,7 +104,9 @@ export const ConversacionService = {
         const conversacion = await ConversacionModel.findOrCreateByUsuarioAndPublicacion(usuario.id_usu, id_publi)
         const mensaje = await ConversacionModel.createMensaje(conversacion.id_conv, usuario.id_usu, data.contenido.trim())
 
-        await notificarRefugio(publicacion.id_ref, usuario.id_usu, id_publi, publicacion.mascota.nom_mascot, conversacion.id_responsable)
+        const notificaciones = await notificarRefugio(publicacion.id_ref, usuario.id_usu, id_publi, publicacion.mascota.nom_mascot, conversacion.id_responsable)
+        await emitirMensaje(mensaje, usuario.id_usu, conversacion)
+        emitirNotificaciones(notificaciones)
 
         return mensaje
     },
@@ -96,22 +118,26 @@ export const ConversacionService = {
         const mensaje = await ConversacionModel.createMensaje(conversacion.id_conv, usuario.id_usu, data.contenido.trim())
 
         if (usuario.id_usu === conversacion.id_usu) {
-            await notificarRefugio(
+            const notificaciones = await notificarRefugio(
                 conversacion.publicacion.id_ref,
                 usuario.id_usu,
                 conversacion.id_publi,
                 conversacion.publicacion.mascota.nom_mascot,
                 conversacion.id_responsable,
             )
+            emitirNotificaciones(notificaciones)
         } else {
-            await ConversacionModel.createNotificaciones([{
+            const notificaciones = await ConversacionModel.createNotificaciones([{
                 id_destinatario: conversacion.id_usu,
                 id_publi: conversacion.id_publi,
                 tipo: 'MENSAJE_CHAT',
                 titulo: 'Nuevo mensaje de adopcion',
                 mensaje: `Nuevo mensaje sobre ${conversacion.publicacion.mascota.nom_mascot}`,
             }])
+            emitirNotificaciones(notificaciones)
         }
+
+        await emitirMensaje(mensaje, usuario.id_usu, conversacion)
 
         return mensaje
     },

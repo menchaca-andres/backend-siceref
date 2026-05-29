@@ -108,7 +108,13 @@ export const ConversacionModel = {
         titulo: string
         mensaje: string
     }>) => {
-        if (notificaciones.length === 0) return
-        await prisma.notificaciones.createMany({ data: notificaciones })
+        if (notificaciones.length === 0) return []
+
+        return await Promise.all(notificaciones.map((notificacion) => prisma.notificaciones.create({
+            data: notificacion,
+            include: {
+                publicacion: { include: { mascota: true, refugio: true } },
+            },
+        })))
     },
 }

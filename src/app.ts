@@ -16,7 +16,7 @@ import conversacionRoutes from './modules/conversaciones/conversacion.routes'
 const app = express()
 
 app.use(cors({
-  origin: 'http://localhost:4200',
+  origin: process.env.FRONTEND_URL || 'http://localhost:4200',
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   allowedHeaders: ['Content-Type', 'Authorization']
 }))

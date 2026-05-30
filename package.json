@@ -6,6 +6,8 @@
   "scripts": {
     "start": "bun run index.ts",
     "dev": "bun --watch index.ts",
+    "build": "prisma generate",
+    "db:deploy": "prisma migrate deploy",
     "test": "bun test --env-file=.env.test"
   },
   "repository": {

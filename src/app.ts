@@ -14,9 +14,12 @@ import notificacionRoutes from './modules/notificaciones/notificacion.routes'
 import conversacionRoutes from './modules/conversaciones/conversacion.routes'
 
 const app = express()
+const allowedOrigins = (process.env.FRONTEND_URLS || process.env.FRONTEND_URL || 'http://localhost:4200')
+  .split(',')
+  .map((origin) => origin.trim())
 
 app.use(cors({
-  origin: process.env.FRONTEND_URL || 'http://localhost:4200',
+  origin: allowedOrigins,
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   allowedHeaders: ['Content-Type', 'Authorization']
 }))

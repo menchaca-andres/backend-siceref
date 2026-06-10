@@ -15,6 +15,7 @@ import conversacionRoutes from './modules/conversaciones/conversacion.routes'
 import pagoRoutes from './modules/pagos/pago.routes'
 import { auditarAccionesUsuario } from './middleware/audit.middleware'
 import logRoutes from './modules/logs/log.routes'
+import reporteRoutes from './modules/reportes/reporte.routes'
 
 const app = express()
 const allowedOrigins = (process.env.FRONTEND_URLS || process.env.FRONTEND_URL || 'http://localhost:4200')
@@ -44,5 +45,6 @@ app.use('/api/conversaciones', conversacionRoutes)
 app.use('/api/pagos', pagoRoutes)
 app.use('/api/auth', authRoutes)
 app.use('/api/logs', logRoutes)
+app.use('/api/reportes', reporteRoutes)
 
 export default app

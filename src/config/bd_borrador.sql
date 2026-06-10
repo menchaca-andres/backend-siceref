@@ -266,7 +266,10 @@ INSERT INTO permisos (codigo, nombre) VALUES
 ('notificaciones:modificar', 'Modificar notificaciones'),
 ('conversaciones:obtener', 'Obtener conversaciones'),
 ('mensajes-chat:crear', 'Crear mensajes de chat'),
-('mensajes-chat:obtener', 'Obtener mensajes de chat');
+('mensajes-chat:obtener', 'Obtener mensajes de chat'),
+('logs:obtener', 'Obtener logs de auditoría'),
+('reportes:obtener', 'Obtener reportes del sistema'),
+('reportes:obtener:propio', 'Obtener reportes del refugio propio');
 
 -- PERMISOS DEL ADMINISTRADOR DEL SISTEMA
 INSERT INTO rol_perm (id_rol, id_per)
@@ -301,7 +304,8 @@ JOIN permisos p ON p.codigo IN (
     'notificaciones:modificar',
     'conversaciones:obtener',
     'mensajes-chat:crear',
-    'mensajes-chat:obtener'
+    'mensajes-chat:obtener',
+    'reportes:obtener:propio'
 )
 WHERE r.codigo = 'admin-refugio';
 

@@ -1,6 +1,7 @@
 import 'dotenv/config'
 import app from './src/app'
 import { RealtimeService } from './src/services/realtime.service'
+import { PaymentNotificationWorkerService } from './src/modules/pagos/adb/payment-notification-worker.service'
 
 const PORT = process.env.PORT || 3000
 
@@ -9,3 +10,4 @@ const server = app.listen(PORT, () => {
 })
 
 RealtimeService.attach(server)
+PaymentNotificationWorkerService.start()

@@ -12,6 +12,7 @@ import publicacionRoutes from './modules/publicaciones/publicacion.routes'
 import tamanioRoutes from './modules/tamanios/tamanio.routes'
 import notificacionRoutes from './modules/notificaciones/notificacion.routes'
 import conversacionRoutes from './modules/conversaciones/conversacion.routes'
+import pagoRoutes from './modules/pagos/pago.routes'
 
 const app = express()
 const allowedOrigins = (process.env.FRONTEND_URLS || process.env.FRONTEND_URL || 'http://localhost:4200')
@@ -37,6 +38,7 @@ app.use('/api/refugios', refugioRoutes)
 app.use('/api/publicaciones', publicacionRoutes)
 app.use('/api/notificaciones', notificacionRoutes)
 app.use('/api/conversaciones', conversacionRoutes)
+app.use('/api/pagos', pagoRoutes)
 app.use('/api/auth', authRoutes)
 
 export default app

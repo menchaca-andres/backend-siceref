@@ -11,6 +11,16 @@ enum tipo_notificacion {
   MENSAJE_CHAT
 }
 
+enum estado_pago_qr {
+  GENERANDO
+  PENDIENTE
+  PAGADO
+  EXPIRADO
+  CANCELADO
+  FALLIDO
+  ERROR
+}
+
 model roles {
   id_rol      Int        @id @default(autoincrement())
   codigo      String     @unique @db.VarChar(50)
@@ -50,6 +60,8 @@ model usuarios {
   rol                         roles            @relation(fields: [id_rol], references: [id_rol])
   id_ref                      Int?
   refugio                     refugios?        @relation(fields: [id_ref], references: [id_ref])
+  pagos_qr_creados            pagos_qr[]        @relation("PagoQrCreador")
+  pagos_qr_recibidos          pagos_qr[]        @relation("PagoQrReceptor")
   notificaciones              notificaciones[]
   mensajes_chat               mensajes_chat[]
   conversaciones              conversaciones[] @relation("ConversacionAdoptante")
@@ -67,6 +79,46 @@ model refugios {
   usuarios      usuarios[]
   mascotas      mascotas[]
   publicaciones publicaciones[]
+  pagos_qr      pagos_qr[]
+}
+
+model pagos_qr {
+  id_pago Int @id @default(autoincrement())
+
+  id_usu  Int?
+  usuario usuarios? @relation("PagoQrCreador", fields: [id_usu], references: [id_usu])
+
+  id_receptor Int?
+  receptor    usuarios? @relation("PagoQrReceptor", fields: [id_receptor], references: [id_usu])
+
+  id_ref  Int?
+  refugio refugios? @relation(fields: [id_ref], references: [id_ref])
+
+  provider_payment_id String?  @db.VarChar(80)
+  provider      String         @default("local") @db.VarChar(30)
+  validation_method String     @default("code_match") @db.VarChar(30)
+  monto         Decimal        @db.Decimal(10, 2)
+  monto_a_pagar Decimal?       @db.Decimal(10, 2)
+  moneda        String         @default("BOB") @db.VarChar(3)
+  glosa         String         @db.Text
+  codigo        String         @db.VarChar(16)
+  qr_payload    String?        @db.Text
+  qr_image_base64 String?      @db.Text
+  estado        estado_pago_qr @default(PENDIENTE)
+  provider_status String?      @db.VarChar(30)
+  provider_message String?     @db.Text
+  estimated_seconds Float      @default(0)
+  failover_count Int           @default(0)
+  attempts      Json           @default("[]")
+  notification  Json?
+  fecha_expira  DateTime
+  fecha_pagado  DateTime?
+  fecha_creado  DateTime       @default(now())
+  fecha_actualizado DateTime   @updatedAt
+
+  @@index([provider_payment_id])
+  @@index([codigo])
+  @@index([estado])
 }
 
 model especies {

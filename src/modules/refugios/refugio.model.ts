@@ -1,17 +1,21 @@
 import { prisma } from '../../config/database'
+import { activeOnly, softDeleteNow, withActiveOnly } from '../../utils/soft-delete'
 import { CreateRefugioDto, UpdateRefugioDto } from './refugio.types'
 
 export const RefugioModel = {
     findAll: async () => {
-        return await prisma.refugios.findMany({ orderBy: { id_ref: 'asc' } })
+        return await prisma.refugios.findMany({
+            where: activeOnly,
+            orderBy: { id_ref: 'asc' },
+        })
     },
 
     findById: async (id: number) => {
-        return await prisma.refugios.findUnique({ where: { id_ref: id } })
+        return await prisma.refugios.findFirst({ where: withActiveOnly({ id_ref: id }) })
     },
 
     findByEmail: async (email: string) => {
-        return await prisma.refugios.findUnique({ where: { email_ref: email } })
+        return await prisma.refugios.findFirst({ where: withActiveOnly({ email_ref: email }) })
     },
 
     create: async (data: CreateRefugioDto) => {
@@ -28,6 +32,9 @@ export const RefugioModel = {
     },
 
     update: async (id: number, data: UpdateRefugioDto) => {
+        const existing = await prisma.refugios.findFirst({ where: withActiveOnly({ id_ref: id }) })
+        if (!existing) return null
+
         return await prisma.refugios.update({
             where: { id_ref: id },
             data: {
@@ -38,6 +45,26 @@ export const RefugioModel = {
     },
 
     delete: async (id: number) => {
-        return await prisma.refugios.delete({ where: { id_ref: id } }).catch(() => null)
+        const existing = await prisma.refugios.findFirst({ where: withActiveOnly({ id_ref: id }) })
+        if (!existing) return null
+
+        const deletedAt = softDeleteNow()
+
+        await prisma.$transaction([
+            prisma.publicaciones.updateMany({
+                where: withActiveOnly({ id_ref: id }),
+                data: { deleted_at: deletedAt, estad_publ: false },
+            }),
+            prisma.mascotas.updateMany({
+                where: withActiveOnly({ id_ref: id }),
+                data: { deleted_at: deletedAt },
+            }),
+            prisma.refugios.update({
+                where: { id_ref: id },
+                data: { deleted_at: deletedAt, estado_ref: false },
+            }),
+        ])
+
+        return await prisma.refugios.findUnique({ where: { id_ref: id } })
     },
 }

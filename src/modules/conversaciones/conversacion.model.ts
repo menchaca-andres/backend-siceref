@@ -1,4 +1,5 @@
 import { prisma } from '../../config/database'
+import { withActiveOnly } from '../../utils/soft-delete'
 
 const mensajeInclude = {
     remitente: {
@@ -35,8 +36,8 @@ const conversacionInclude = {
 
 export const ConversacionModel = {
     findPublicacionById: async (id_publi: number) => {
-        return await prisma.publicaciones.findUnique({
-            where: { id_publi },
+        return await prisma.publicaciones.findFirst({
+            where: withActiveOnly({ id_publi }),
             include: { mascota: true, refugio: true },
         })
     },

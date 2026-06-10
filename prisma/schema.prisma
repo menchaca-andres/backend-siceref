@@ -23,18 +23,26 @@ enum estado_pago_qr {
 
 model roles {
   id_rol      Int        @id @default(autoincrement())
-  codigo      String     @unique @db.VarChar(50)
+  codigo      String     @db.VarChar(50)
   nom_rol     String     @db.VarChar(50)
   descrip_rol String     @db.Text
+  deleted_at  DateTime?
   rolPerms    rol_perm[]
   usuarios    usuarios[]
+
+  @@index([codigo])
+  @@index([deleted_at])
 }
 
 model permisos {
-  id_per   Int        @id @default(autoincrement())
-  codigo   String     @unique @db.VarChar(80)
-  nombre   String     @db.VarChar(50)
-  rolPerms rol_perm[]
+  id_per     Int        @id @default(autoincrement())
+  codigo     String     @db.VarChar(80)
+  nombre     String     @db.VarChar(50)
+  deleted_at DateTime?
+  rolPerms   rol_perm[]
+
+  @@index([codigo])
+  @@index([deleted_at])
 }
 
 model rol_perm {
@@ -53,8 +61,9 @@ model usuarios {
   apell_usu  String   @db.VarChar(80)
   fecnac_usu DateTime @db.Date
   numcel_usu String   @db.VarChar(20)
-  email_usu  String   @unique @db.VarChar(80)
-  pass_usu   String   @db.Text
+  email_usu  String    @db.VarChar(80)
+  pass_usu   String    @db.Text
+  deleted_at DateTime?
 
   id_rol                      Int
   rol                         roles            @relation(fields: [id_rol], references: [id_rol])
@@ -67,6 +76,9 @@ model usuarios {
   conversaciones              conversaciones[] @relation("ConversacionAdoptante")
   conversaciones_responsables conversaciones[] @relation("ConversacionResponsable")
   logs_usuario                logs_usuario[]
+
+  @@index([email_usu])
+  @@index([deleted_at])
 }
 
 model logs_usuario {
@@ -95,12 +107,16 @@ model refugios {
   nom_ref       String          @db.VarChar(80)
   direc_ref     String          @db.VarChar(150)
   telef_ref     String          @db.VarChar(20)
-  email_ref     String          @unique @db.VarChar(80)
+  email_ref     String          @db.VarChar(80)
   estado_ref    Boolean         @default(true)
+  deleted_at    DateTime?
   usuarios      usuarios[]
   mascotas      mascotas[]
   publicaciones publicaciones[]
   pagos_qr      pagos_qr[]
+
+  @@index([email_ref])
+  @@index([deleted_at])
 }
 
 model pagos_qr {
@@ -143,28 +159,38 @@ model pagos_qr {
 }
 
 model especies {
-  id_esp  Int    @id @default(autoincrement())
-  nom_esp String @db.VarChar(50)
+  id_esp     Int       @id @default(autoincrement())
+  nom_esp    String    @db.VarChar(50)
+  deleted_at DateTime?
 
   razas razas[]
+
+  @@index([deleted_at])
 }
 
 model razas {
-  id_raza  Int    @id @default(autoincrement())
-  nom_raza String @db.VarChar(50)
+  id_raza    Int       @id @default(autoincrement())
+  nom_raza   String    @db.VarChar(50)
+  deleted_at DateTime?
 
   id_esp  Int
   especie especies @relation(fields: [id_esp], references: [id_esp])
 
   mascotas mascotas[]
+
+  @@index([deleted_at])
 }
 
 model tamanios {
-  id_tam     Int     @id @default(autoincrement())
-  nom_tam    String  @unique @db.VarChar(50)
-  estado_tam Boolean @default(true)
+  id_tam     Int       @id @default(autoincrement())
+  nom_tam    String    @db.VarChar(50)
+  estado_tam Boolean   @default(true)
+  deleted_at DateTime?
 
   mascotas mascotas[]
+
+  @@index([nom_tam])
+  @@index([deleted_at])
 }
 
 model mascotas {
@@ -177,7 +203,8 @@ model mascotas {
   sexo_mascot     String   @db.VarChar(10)
   caract_mascot   String   @db.Text
   fechaing_mascot DateTime @default(now()) @db.Date
-  hist_mascot     String   @db.Text
+  hist_mascot     String    @db.Text
+  deleted_at      DateTime?
 
   id_raza Int
   raza    razas @relation(fields: [id_raza], references: [id_raza])
@@ -189,13 +216,16 @@ model mascotas {
   refugio refugios @relation(fields: [id_ref], references: [id_ref])
 
   publicaciones publicaciones[]
+
+  @@index([deleted_at])
 }
 
 model publicaciones {
   id_publi Int @id @default(autoincrement())
 
-  fechapubli DateTime @default(now()) @db.Date
-  estad_publ Boolean  @default(true)
+  fechapubli DateTime  @default(now()) @db.Date
+  estad_publ Boolean   @default(true)
+  deleted_at DateTime?
 
   id_ani  Int
   mascota mascotas @relation(fields: [id_ani], references: [id_ani])
@@ -205,6 +235,8 @@ model publicaciones {
 
   notificaciones notificaciones[]
   conversaciones conversaciones[]
+
+  @@index([deleted_at])
 }
 
 model notificaciones {

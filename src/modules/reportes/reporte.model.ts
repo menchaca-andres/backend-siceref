@@ -1,20 +1,21 @@
 import { estado_pago_qr, Prisma } from '../../../generated/prisma/client'
 import { prisma } from '../../config/database'
+import { activeOnly } from '../../utils/soft-delete'
 import { EstadoProcesoAdopcion, ListReporteParams, ReporteScope } from './reporte.types'
 
-const buildRefugioFilter = (scope?: ReporteScope): Prisma.refugiosWhereInput | undefined => {
-    if (scope?.id_ref == null) return undefined
-    return { id_ref: scope.id_ref }
+const buildRefugioFilter = (scope?: ReporteScope): Prisma.refugiosWhereInput => {
+    if (scope?.id_ref == null) return activeOnly
+    return { ...activeOnly, id_ref: scope.id_ref }
 }
 
 const buildPublicacionScope = (scope?: ReporteScope): Prisma.publicacionesWhereInput => {
-    if (scope?.id_ref == null) return {}
-    return { id_ref: scope.id_ref }
+    if (scope?.id_ref == null) return activeOnly
+    return { ...activeOnly, id_ref: scope.id_ref }
 }
 
 const buildMascotaScope = (scope?: ReporteScope): Prisma.mascotasWhereInput => {
-    if (scope?.id_ref == null) return {}
-    return { id_ref: scope.id_ref }
+    if (scope?.id_ref == null) return activeOnly
+    return { ...activeOnly, id_ref: scope.id_ref }
 }
 
 const buildPagoScope = (scope?: ReporteScope): Prisma.pagos_qrWhereInput => {
@@ -47,10 +48,12 @@ export const ReporteModel = {
         const mascotaScope = buildMascotaScope(scope)
         const pagoScope = buildPagoScope(scope)
 
-        const usuarioWhere: Prisma.usuariosWhereInput = scope?.id_ref != null ? { id_ref: scope.id_ref } : {}
+        const usuarioWhere: Prisma.usuariosWhereInput = scope?.id_ref != null
+            ? { ...activeOnly, id_ref: scope.id_ref }
+            : activeOnly
         const conversacionWhere: Prisma.conversacionesWhereInput = scope?.id_ref != null
-            ? { publicacion: { id_ref: scope.id_ref } }
-            : {}
+            ? { publicacion: { ...activeOnly, id_ref: scope.id_ref } }
+            : { publicacion: activeOnly }
 
         const [
             usuarios_registrados,
@@ -72,8 +75,8 @@ export const ReporteModel = {
                 where: usuarioWhere,
                 _count: { _all: true },
             }),
-            prisma.refugios.count({ where: { ...refugioFilter, estado_ref: true } }),
-            prisma.refugios.count({ where: { ...refugioFilter, estado_ref: false } }),
+            prisma.refugios.count({ where: { ...refugioFilter, estado_ref: true, ...activeOnly } }),
+            prisma.refugios.count({ where: { ...refugioFilter, estado_ref: false, ...activeOnly } }),
             prisma.mascotas.count({ where: mascotaScope }),
             prisma.publicaciones.count({ where: { ...publicacionScope, estad_publ: true } }),
             prisma.publicaciones.count({ where: { ...publicacionScope, estad_publ: false } }),
@@ -89,7 +92,10 @@ export const ReporteModel = {
                 : prisma.logs_usuario.count(),
         ])
 
-        const roles = await prisma.roles.findMany({ select: { id_rol: true, codigo: true, nom_rol: true } })
+        const roles = await prisma.roles.findMany({
+            where: activeOnly,
+            select: { id_rol: true, codigo: true, nom_rol: true },
+        })
         const rolesMap = new Map(roles.map((rol) => [rol.id_rol, rol]))
 
         return {
@@ -122,6 +128,7 @@ export const ReporteModel = {
         const take = Math.min(Math.max(limit, 1), 100)
         const skip = (Math.max(page, 1) - 1) * take
         const where: Prisma.usuariosWhereInput = {
+            ...activeOnly,
             ...(id_rol ? { id_rol } : {}),
             ...(id_ref ? { id_ref } : {}),
         }

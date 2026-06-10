@@ -1,5 +1,6 @@
 import { prisma } from '../../config/database'
 import { toDate } from '../../utils/date'
+import { activeOnly, softDeleteNow, withActiveOnly } from '../../utils/soft-delete'
 import { CreateUsuarioDto, UpdateUsuarioDto } from './usuario.types'
 
 const usuarioSelect = {
@@ -19,27 +20,29 @@ const usuarioSelect = {
 export const UsuarioModel = {
   findAll: async () => {
     return await prisma.usuarios.findMany({
+      where: activeOnly,
       select: usuarioSelect,
       orderBy: { id_usu: 'asc' },
     })
   },
 
   findById: async (id: number) => {
-    return await prisma.usuarios.findUnique({
-      where: { id_usu: id },
+    return await prisma.usuarios.findFirst({
+      where: withActiveOnly({ id_usu: id }),
       select: usuarioSelect,
     })
   },
 
   findByEmail: async (email: string) => {
-    return await prisma.usuarios.findUnique({ where: { email_usu: email } })
+    return await prisma.usuarios.findFirst({ where: withActiveOnly({ email_usu: email }) })
   },
 
   findWorkersByRefugio: async (id_ref: number) => {
     return await prisma.usuarios.findMany({
       where: {
+        ...activeOnly,
         id_ref,
-        rol: { codigo: 'trabajador-refugio' },
+        rol: { codigo: 'trabajador-refugio', ...activeOnly },
       },
       select: usuarioSelect,
       orderBy: { id_usu: 'asc' },
@@ -64,6 +67,9 @@ export const UsuarioModel = {
   },
 
   update: async (id: number, data: UpdateUsuarioDto) => {
+    const existing = await prisma.usuarios.findFirst({ where: withActiveOnly({ id_usu: id }) })
+    if (!existing) return null
+
     return await prisma.usuarios.update({
       where: { id_usu: id },
       data: {
@@ -82,6 +88,13 @@ export const UsuarioModel = {
   },
 
   delete: async (id: number) => {
-    return await prisma.usuarios.delete({ where: { id_usu: id } }).catch(() => null)
+    const existing = await prisma.usuarios.findFirst({ where: withActiveOnly({ id_usu: id }) })
+    if (!existing) return null
+
+    return await prisma.usuarios.update({
+      where: { id_usu: id },
+      data: { deleted_at: softDeleteNow() },
+      select: usuarioSelect,
+    })
   },
 }

@@ -1,9 +1,10 @@
 import { Request, Response, NextFunction } from 'express'
 import { prisma } from '../config/database'
+import { activeOnly } from '../utils/soft-delete'
 
 const obtenerPermisosDelRol = async (id_rol: number) => {
     const permisos = await prisma.rol_perm.findMany({
-        where: { id_rol },
+        where: { id_rol, rol: activeOnly, permiso: activeOnly },
         include: { permiso: true },
     })
 
@@ -47,7 +48,7 @@ export const autorizarRol = (...rolesPermitidos: string[]) => {
             return
         }
 
-        const rol = await prisma.roles.findUnique({ where: { id_rol: req.usuario.id_rol } }).catch(() => null)
+        const rol = await prisma.roles.findFirst({ where: { id_rol: req.usuario.id_rol, ...activeOnly } }).catch(() => null)
 
         if (!rol) {
             res.status(500).json({ message: 'No se pudo validar el rol' })

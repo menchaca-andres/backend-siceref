@@ -1,4 +1,5 @@
 import { prisma } from '../../config/database'
+import { activeOnly, softDeleteNow, withActiveOnly } from '../../utils/soft-delete'
 import { CreatePublicacionDto, UpdatePublicacionDto } from './publicacion.types'
 
 const parseBoolean = (value: boolean | string | undefined) => {
@@ -6,27 +7,39 @@ const parseBoolean = (value: boolean | string | undefined) => {
     return value === true || value === 'true'
 }
 
+const includePublicacion = {
+    mascota: { include: { raza: { include: { especie: true } }, tamano: true } },
+    refugio: true,
+}
+
+const activePublicacionWhere = {
+    ...activeOnly,
+    mascota: activeOnly,
+    refugio: activeOnly,
+}
+
 export const PublicacionModel = {
     findAll: async (id_ref?: number | null, id_ani?: number) => {
         return await prisma.publicaciones.findMany({
             where: {
+                ...activePublicacionWhere,
                 ...(id_ref != null ? { id_ref } : {}),
                 ...(id_ani !== undefined ? { id_ani } : {}),
             },
-            include: { mascota: { include: { raza: { include: { especie: true } }, tamano: true } }, refugio: true },
+            include: includePublicacion,
             orderBy: { id_publi: 'asc' },
         })
     },
 
     findById: async (id: number) => {
-        return await prisma.publicaciones.findUnique({
-            where: { id_publi: id },
-            include: { mascota: { include: { raza: { include: { especie: true } }, tamano: true } }, refugio: true },
+        return await prisma.publicaciones.findFirst({
+            where: withActiveOnly({ id_publi: id }),
+            include: includePublicacion,
         })
     },
 
     findMascotaById: async (id: number) => {
-        return await prisma.mascotas.findUnique({ where: { id_ani: id } })
+        return await prisma.mascotas.findFirst({ where: withActiveOnly({ id_ani: id }) })
     },
 
     create: async (data: CreatePublicacionDto & { id_ref: number }) => {
@@ -40,6 +53,9 @@ export const PublicacionModel = {
     },
 
     update: async (id: number, data: UpdatePublicacionDto) => {
+        const existing = await prisma.publicaciones.findFirst({ where: withActiveOnly({ id_publi: id }) })
+        if (!existing) return null
+
         return await prisma.publicaciones.update({
             where: { id_publi: id },
             data: {
@@ -51,6 +67,12 @@ export const PublicacionModel = {
     },
 
     delete: async (id: number) => {
-        return await prisma.publicaciones.delete({ where: { id_publi: id } }).catch(() => null)
+        const existing = await prisma.publicaciones.findFirst({ where: withActiveOnly({ id_publi: id }) })
+        if (!existing) return null
+
+        return await prisma.publicaciones.update({
+            where: { id_publi: id },
+            data: { deleted_at: softDeleteNow(), estad_publ: false },
+        }).catch(() => null)
     },
 }

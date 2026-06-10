@@ -2,11 +2,12 @@ import bcrypt from 'bcrypt'
 import jwt from 'jsonwebtoken'
 import { prisma } from '../../config/database'
 import { toDate } from '../../utils/date'
+import { withActiveOnly } from '../../utils/soft-delete'
 import { LoginDto, JwtPayload, RegisterDto, RegisterWorkerDto } from './auth.types'
 import { uploadImageToCloudinary } from '../../config/cloudinary'
 
 const getRoleIdByCode = async (codigo: string) => {
-    const role = await prisma.roles.findUnique({ where: { codigo } })
+    const role = await prisma.roles.findFirst({ where: withActiveOnly({ codigo }) })
 
     if (!role) throw new Error(`Rol no configurado: ${codigo}`)
     return role.id_rol
@@ -32,11 +33,11 @@ const resolveUsuarioImage = async (data: RegisterDto, file?: Express.Multer.File
 
 export const AuthService = {
     login: async (data: LoginDto) => {
-        const usuario = await prisma.usuarios.findUnique({
-            where: { email_usu: data.email_usu },
+        const usuario = await prisma.usuarios.findFirst({
+            where: withActiveOnly({ email_usu: data.email_usu }),
             include: { rol: { include: { rolPerms: { include: { permiso: true } } } } },
         })
-        if (!usuario) throw new Error('Correo o contraseña incorrectos')
+        if (!usuario || usuario.deleted_at) throw new Error('Correo o contraseña incorrectos')
 
         const passwordValido = await bcrypt.compare(data.pass_usu, usuario.pass_usu)
         if (!passwordValido) throw new Error('Correo o contraseña incorrectos')
@@ -68,7 +69,7 @@ export const AuthService = {
     },
 
     register: async (data: RegisterDto, file?: Express.Multer.File) => {
-        const existe = await prisma.usuarios.findUnique({ where: { email_usu: data.email_usu } })
+        const existe = await prisma.usuarios.findFirst({ where: withActiveOnly({ email_usu: data.email_usu }) })
         if (existe) throw new Error('El correo ya está registrado')
 
         const img_usu = await resolveUsuarioImage(data, file)
@@ -86,7 +87,7 @@ export const AuthService = {
             throw new Error('No puedes registrar trabajadores en otro refugio')
         }
 
-        const existe = await prisma.usuarios.findUnique({ where: { email_usu: data.email_usu } })
+        const existe = await prisma.usuarios.findFirst({ where: withActiveOnly({ email_usu: data.email_usu }) })
         if (existe) throw new Error('El correo ya está registrado')
 
         const img_usu = await resolveUsuarioImage(data, file)
@@ -100,7 +101,7 @@ export const AuthService = {
     },
 
     registerSuperadmin: async (data: RegisterDto, file?: Express.Multer.File) => {
-        const existe = await prisma.usuarios.findUnique({ where: { email_usu: data.email_usu } })
+        const existe = await prisma.usuarios.findFirst({ where: withActiveOnly({ email_usu: data.email_usu }) })
         if (existe) throw new Error('El correo ya está registrado')
 
         const img_usu = await resolveUsuarioImage(data, file)
@@ -114,7 +115,7 @@ export const AuthService = {
     },
 
     registerAdminRefugio: async (data: RegisterWorkerDto, file?: Express.Multer.File) => {
-        const existe = await prisma.usuarios.findUnique({ where: { email_usu: data.email_usu } })
+        const existe = await prisma.usuarios.findFirst({ where: withActiveOnly({ email_usu: data.email_usu }) })
         if (existe) throw new Error('El correo ya está registrado')
 
         const img_usu = await resolveUsuarioImage(data, file)

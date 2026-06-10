@@ -1,5 +1,6 @@
 import { estado_pago_qr, Prisma } from '../../../generated/prisma/client'
 import { prisma } from '../../config/database'
+import { activeOnly, withActiveOnly } from '../../utils/soft-delete'
 
 export const PagoModel = {
     createQr: async (data: {
@@ -123,12 +124,15 @@ export const PagoModel = {
     findDonationReceiver: async () => {
         const configuredId = Number(process.env.SUPERADMIN_USER_ID || 0)
         if (configuredId > 0) {
-            const usuario = await prisma.usuarios.findUnique({ where: { id_usu: configuredId }, include: { rol: true } })
+            const usuario = await prisma.usuarios.findFirst({
+                where: withActiveOnly({ id_usu: configuredId }),
+                include: { rol: true },
+            })
             if (usuario) return usuario
         }
 
         return await prisma.usuarios.findFirst({
-            where: { rol: { codigo: 'admin-sistema' } },
+            where: { ...activeOnly, rol: { codigo: 'admin-sistema', ...activeOnly } },
             include: { rol: true },
             orderBy: { id_usu: 'asc' },
         })

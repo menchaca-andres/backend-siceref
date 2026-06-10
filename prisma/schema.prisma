@@ -66,6 +66,27 @@ model usuarios {
   mensajes_chat               mensajes_chat[]
   conversaciones              conversaciones[] @relation("ConversacionAdoptante")
   conversaciones_responsables conversaciones[] @relation("ConversacionResponsable")
+  logs_usuario                logs_usuario[]
+}
+
+model logs_usuario {
+  id_log Int @id @default(autoincrement())
+
+  id_usu  Int?
+  usuario usuarios? @relation(fields: [id_usu], references: [id_usu], onDelete: SetNull)
+
+  accion     String   @db.VarChar(120)
+  entidad    String?  @db.VarChar(80)
+  id_entidad String?  @db.VarChar(80)
+  detalle    Json?
+  ip         String?  @db.VarChar(45)
+  user_agent String?  @db.Text
+  fecha_log  DateTime @default(now())
+
+  @@index([id_usu])
+  @@index([accion])
+  @@index([entidad, id_entidad])
+  @@index([fecha_log])
 }
 
 model refugios {

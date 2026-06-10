@@ -14,6 +14,29 @@ bun run dev
 
 npx prisma db push
 ```
+
+## Cache con Redis
+
+El backend cachea respuestas GET compartibles para acelerar pantallas públicas y listados del panel.
+
+Variables de entorno:
+
+| Variable | Descripción | Default |
+| --- | --- | --- |
+| `REDIS_URL` | URL de conexión Redis. Si no existe o falla, usa cache en memoria local. | - |
+| `CACHE_TTL_SECONDS` | TTL default para respuestas cacheadas. | `300` |
+| `CACHE_NAMESPACE` | Prefijo para separar ambientes o apps en Redis. | `siceref` |
+
+Ejemplo:
+
+```bash
+REDIS_URL=redis://default:password@host:6379
+CACHE_TTL_SECONDS=300
+CACHE_NAMESPACE=siceref-prod
+```
+
+No se cachean endpoints de logs, notificaciones, conversaciones, pagos ni login.
+
 ## Estructura del proyecto
 
 ```
@@ -95,4 +118,3 @@ npx prisma db push
 │       └── date.ts
 └── tsconfig.json
 ```
-

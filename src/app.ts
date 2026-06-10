@@ -13,6 +13,8 @@ import tamanioRoutes from './modules/tamanios/tamanio.routes'
 import notificacionRoutes from './modules/notificaciones/notificacion.routes'
 import conversacionRoutes from './modules/conversaciones/conversacion.routes'
 import pagoRoutes from './modules/pagos/pago.routes'
+import { auditarAccionesUsuario } from './middleware/audit.middleware'
+import logRoutes from './modules/logs/log.routes'
 
 const app = express()
 const allowedOrigins = (process.env.FRONTEND_URLS || process.env.FRONTEND_URL || 'http://localhost:4200')
@@ -26,6 +28,7 @@ app.use(cors({
 }))
 
 app.use(express.json())
+app.use(auditarAccionesUsuario)
 
 app.use('/api/permisos', permisoRoutes)
 app.use('/api/roles', roleRoutes)
@@ -40,5 +43,6 @@ app.use('/api/notificaciones', notificacionRoutes)
 app.use('/api/conversaciones', conversacionRoutes)
 app.use('/api/pagos', pagoRoutes)
 app.use('/api/auth', authRoutes)
+app.use('/api/logs', logRoutes)
 
 export default app

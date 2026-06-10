@@ -1,10 +1,21 @@
 import { Request, Response } from 'express'
 import { AuthService } from './auth.service'
+import { AuditLogService } from '../../services/audit-log.service'
 
 export const AuthController = {
     login: async (req: Request, res: Response) => {
         try {
             const result = await AuthService.login(req.body)
+            void AuditLogService.create({
+                req,
+                id_usu: result.usuario.id_usu,
+                accion: 'auth.login',
+                entidad: 'usuarios',
+                id_entidad: result.usuario.id_usu,
+                detalle: { email_usu: result.usuario.email_usu },
+            }).catch((error) => {
+                console.error('Error al registrar log de login:', error)
+            })
             res.json(result)
         } catch (error: any) {
             res.status(401).json({ message: error.message })
@@ -14,6 +25,16 @@ export const AuthController = {
     register: async (req: Request, res: Response) => {
         try {
             const usuario = await AuthService.register(req.body, req.file)
+            void AuditLogService.create({
+                req,
+                id_usu: usuario.id_usu,
+                accion: 'auth.register',
+                entidad: 'usuarios',
+                id_entidad: usuario.id_usu,
+                detalle: { email_usu: usuario.email_usu },
+            }).catch((error) => {
+                console.error('Error al registrar log de registro:', error)
+            })
             res.status(201).json({ message: 'Adoptante registrado correctamente', usuario })
         } catch (error: any) {
             res.status(400).json({ message: error.message })
